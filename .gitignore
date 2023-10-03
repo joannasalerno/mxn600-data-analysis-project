@@ -1,0 +1,10 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+Assignment_2.Rproj
+benchmark_testing_loan_data.csv
+benchmark_training_loan_data.csv
+benchmark_validation_loan_data.csv
+extendend_version_loan_data.csv
+loan_data_dictionary.xlsx
