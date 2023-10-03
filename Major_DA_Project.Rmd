@@ -1,6 +1,6 @@
 ---
 title: "Major_DA_Project"
-author: "Joanna Salerno"
+author: "Joanna Salerno, Pavan Asopa, Sevin Nejadi, Fernanda Martins Guiriati"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
@@ -8,3 +8,5 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+Testing...
