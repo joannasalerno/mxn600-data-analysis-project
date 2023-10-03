@@ -1,0 +1,10 @@
+---
+title: "Major_DA_Project"
+author: "Joanna Salerno"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
