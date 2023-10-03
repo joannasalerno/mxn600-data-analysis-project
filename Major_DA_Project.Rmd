@@ -1,5 +1,5 @@
 ---
-title: "Major_DA_Project"
+title: "MXN600 Major Data Anaysis Project"
 author: "Joanna Salerno, Pavan Asopa, Sevin Nejadi, Fernanda Martins Giuriati"
 date: "`r Sys.Date()`"
 output: pdf_document
