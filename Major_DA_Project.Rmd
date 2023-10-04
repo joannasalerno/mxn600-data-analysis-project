@@ -58,7 +58,9 @@ extended <- read.csv("extendend_version_loan_data.csv")
 
 We will begin by exploring the available data to understand how each variable is distributed and to identify any potential data quality issues. We will also investigate the relationships between the different variables to see whether any variables are highly correlated with one another.
 
-We will first explore the test data to understand its structure and the variables it is comprised of.
+Note: For this exploration portion of our analysis, we will be using the training dataset.
+
+We will first explore the training dataset to understand its structure and the variables it is comprised of.
 
 ```{r head_data}
 head(train_data, 10)
@@ -68,7 +70,7 @@ head(train_data, 10)
 dim(train_data)
 ```
 
-The test dataset contains a total of 23,052 observations of 19 variables.
+The training dataset contains a total of 23,052 observations of 19 variables.
 
 ```{r data_structure}
 str(train_data)
