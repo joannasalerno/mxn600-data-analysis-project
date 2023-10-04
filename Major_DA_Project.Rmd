@@ -11,7 +11,21 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-The credit risk models our lending start up company uses are of the utmost importance to the functioning and ultimate success of the company. 
+The credit risk models our lending start up company uses are of the utmost importance to the functioning and ultimate success of the company. As we were recently acquired by a regional Australian bank, the success of our company also impacts the success of the bank. Recently, some of the bank's senior financial analysts have raised concerns about the credit risk models we have been using. They reviewed our models' performance benchmarks and feel as though our models are not suitable for use in a setting in which they are subject to strict regulatory requirements.
+
+Thus, we have been tasked by the bank's management to rebuild our credit risk model from the ground up. As per management, our main objective is to use information known at the time of a loan application to build a model that predicts loan default. We will follow a standard statistical analysis process, which will be guided by the following questions:
+
+1. How does this new model perform compared to the one used previously? How can it be expected to perform on new loan applications?
+2. What are the important variables in this model and how do they compare to variables that are traditionally important for predicting credit risk in the banking sector?
+
+Furthermore, management has consulted with an expert statistician, who has suggested we also account for variation in trends that may exist either between different jurisdictions or over time. The following questions will guide this second part of our analysis:
+
+3. Can accounting for this variation (e.g., state/zip-code and time) improve performance benchmarks?
+4. Are there any surprising differences in variables that are important for predicting credit risk?
+5. Does credit risk change over time or between states? This is not something the bank has previously
+investigated and results may inform modified loan policies in the future.
+
+This report will document our entire analysis process, beginning with data exploration and cleaning, to model building and interpretations of our results.
 
 # Setup
 
@@ -26,7 +40,12 @@ library(lme4)
 library(lmerTest)
 ```
 
-Next, we will load in our datasets.
+Next, we will load in our datasets. We have a total of 4:
+
+(1) A training dataset that we will use to build and train our model
+(2) A test dataset that we will use to test the fit of our model(s)
+(3) A validation dataset that we will use to assess the performance of our model(s)
+(4) An extended dataset that includes the necessary variables for us to account for variation such as location and time
 
 ```{r load_data}
 train_data <- read.csv("benchmark_training_loan_data.csv")
