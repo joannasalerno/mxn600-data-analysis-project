@@ -31,7 +31,7 @@ This report will document our entire analysis process, beginning with data explo
 
 We will first load in the required libraries for our data exploration and analysis process.
 
-```{r load_libraries echo=FALSE}
+```{r load_libraries, echo=FALSE}
 library(tidyverse)
 library(ggplot2)
 library(MASS)
