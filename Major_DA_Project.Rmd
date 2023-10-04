@@ -11,15 +11,122 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
+The credit risk models our lending start up company uses are of the utmost importance to the functioning and ultimate success of the company. 
 
 # Setup
 
+We will first load in the required libraries for our data exploration and analysis process.
+
+```{r load_libraries echo=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(MASS)
+library(GGally)
+library(lme4)
+library(lmerTest)
+```
+
+Next, we will load in our datasets.
+
+```{r load_data}
+train_data <- read.csv("benchmark_training_loan_data.csv")
+test_data <- read.csv("benchmark_testing_loan_data.csv")
+val_data <- read.csv("benchmark_validation_loan_data.csv")
+extended <- read.csv("extendend_version_loan_data.csv")
+```
 
 # Exploratory Analysis
 
+We will begin by exploring the available data to understand how each variable is distributed and to identify any potential data quality issues. We will also investigate the relationships between the different variables to see whether any variables are highly correlated with one another.
+
+We will first explore the test data to understand its structure and the variables it is comprised of.
+
+```{r head_data}
+head(train_data, 10)
+```
+
+```{r data_dim}
+dim(train_data)
+```
+
+The test dataset contains a total of 23,052 observations of 19 variables.
+
+```{r data_structure}
+str(train_data)
+```
+
+Upon further investigation of the structure of the training data, we can see that 14 of the 19 variables are currently of numeric type, and the remaining 5 variables are characters. We will further investigate each variable to determine whether there are any outliers or missing data.
+
+```{r data_summary}
+summary(train_data)
+```
+
+Included above is the numeric distributions of each of the included variables.
+*** FURTHER EXPLAIN ***
+
+Now, we will briefly explore the data to see whether there are missing data for us to handle.
+
+```{r sum_na}
+sum(is.na(train_data))
+```
+
+Based on the above output, it appears as though, at least for numeric variables, this dataset does not contain any missing data in the form of NA values.
+
+## Exploratory Plots
+
+Below, we create a plot that depicts the correlation between the different numeric variables; it includes both correlation coefficients and visuals of the distribution of each included variable.
+
+```{r ggpairs_plot}
+# create ggpairs plot with the specified columns
+ggpairs_plot <- ggpairs(train_data[, c("loan_amnt","int_rate", "annual_inc", "dti",
+                                      "delinq_2yrs", "inq_last_6mths", "open_acc",
+                                      "pub_rec", "revol_util", "revol_bal", "total_acc",
+                                      "credit_age_yrs")],
+                        progress = FALSE)
+
+ggpairs_plot
+```
+
+Below, we create a correlation matrix of the numeric variables to help us understand the relationship between the different numeric variables.
+
+```{r corr_matrix}
+# correlation matrix
+```
 
 # New Credit Risk Model
 
+```{r pois}
+#Full model with all possible interactions for backwards selection:
+full_interaction_model <- glm(data = train_data,
+    formula = repay_fail ~ loan_amnt* term * int_rate * emp_length * home_ownership * annual_inc *
+      verification_status * purpose * dti * delinq_2yrs * inq_last_6mths * open_acc * pub_rec *
+      revol_bal * revol_util * total_acc * credit_age_yrs,
+    family = "binomial")
+
+#Model with no variables present for forwards selection:
+null_model <- glm(data = train_data,
+    formula = repay_fail ~ 1,
+    family = "binomial")
+
+#Perform backward and forward selection:
+backward_sel_model <- stepAIC(
+  full_interaction_model, direction = "backward",trace = 0)
+forward_sel_model <- stepAIC(
+  null_model,
+  scope = formula(full_interaction_model), 
+  direction = "forward",
+  trace = 0) ## trace = 0 prevents automatic output of stepAIC function.
+```
+
 
 # Extended Credit Risk Model
+
+
+# Conclusion
+
+
+## Limitations
+
+
+## Future Directions
 
