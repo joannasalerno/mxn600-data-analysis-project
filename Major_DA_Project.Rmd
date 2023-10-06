@@ -10,7 +10,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Introduction
-# Introduction -- test---
 
 The credit risk models our lending start up company uses are of the utmost importance to the functioning and ultimate success of the company. As we were recently acquired by a regional Australian bank, the success of our company also impacts the success of the bank. Recently, some of the bank's senior financial analysts have raised concerns about the credit risk models we have been using. They reviewed our models' performance benchmarks and feel as though our models are not suitable for use in a setting in which they are subject to strict regulatory requirements.
 
@@ -35,6 +34,7 @@ We will first load in the required libraries for our data exploration and analys
 ```{r load_libraries, echo=FALSE}
 library(tidyverse)
 library(ggplot2)
+library(ggpubr)
 library(MASS)
 library(GGally)
 library(lme4)
@@ -67,6 +67,8 @@ We will first explore the training dataset to understand its structure and the v
 head(train_data, 10)
 ```
 
+At first glance of the first 10 rows of this dataset, we notice there is a value of n/a in the employment length column. There are also a few zero values in a few columns. This will prompt us to further explore the data for any true missing values.
+
 ```{r data_dim}
 dim(train_data)
 ```
@@ -77,26 +79,73 @@ The training dataset contains a total of 23,052 observations of 19 variables.
 str(train_data)
 ```
 
-Upon further investigation of the structure of the training data, we can see that 14 of the 19 variables are currently of numeric type, and the remaining 5 variables are characters. We will further investigate each variable to determine whether there are any outliers or missing data.
+Upon further investigation of the structure of the training data, we can see that 14 of the 19 variables are currently of numeric type, and the remaining 5 variables are characters. We will now further investigate each variable to determine whether there is any missing data or outliers.
 
 ```{r data_summary}
 summary(train_data)
 ```
 
-Included above is the numeric distributions of each of the included variables.
-*** FURTHER EXPLAIN ***
+Included above is the numeric distributions of each of the included variables. Based on the above summary, it appears as though there may exist one or multiple outliers in a few variables: annual income, inquiries in the last 6 months, open accounts, revolving balances, and total accounts. However, we will need to further investigate the distribution of all variables to better visualize this to determine whether these actually appear to be outliers.
 
-Now, we will briefly explore the data to see whether there are missing data for us to handle.
+Before producing some exploratory plots, we will briefly explore the data to see whether there are missing values for us to handle.
 
 ```{r sum_na}
-sum(is.na(train_data))
+colSums(is.na(train_data))
 ```
 
-Based on the above output, it appears as though, at least for numeric variables, this dataset does not contain any missing data in the form of NA values.
+Based on the above output, it appears as though this dataset does not contain any missing data in the form of NA values. Now, we will explore the n/a values present in the columns which include string data.
+
+```{r string_na_sum}
+sum(train_data == 'n/a')
+```
+
+```{r string_na_rows}
+train_data %>% filter_all(any_vars(. %in% c('n/a')))
+```
+
+Based on the above output, there are a total of 591 n/a (string) in this dataset. These all appear to be from the employment length column. We will move forward and assume that this is not truly missing data, but rather, means that the applicant is not currently employed. We will further examine the ditribution of each variable by creating exploratory plots, and this will further clarify the meaning of some of the values contained within each column of the dataset.
 
 ## Exploratory Plots
 
-Below, we create a plot that depicts the correlation between the different numeric variables; it includes both correlation coefficients and visuals of the distribution of each included variable.
+Before we can create exploratory plots, there are a few variables we will need to convert to factors. This will help us in creating our visualizations as well as conducting our analyses, so we can consider the selected variables as factors with different levels rather than simply strings.
+
+```{r convert_vars_to_factors}
+train_data$term <- as.factor(train_data$term)
+train_data$emp_length <- as.factor(train_data$emp_length)
+train_data$home_ownership <- as.factor(train_data$home_ownership)
+train_data$verification_status <- as.factor(train_data$verification_status)
+train_data$purpose <- as.factor(train_data$purpose)
+train_data$repay_fail <- as.factor(train_data$repay_fail)
+```
+
+Now, we will create some histograms to visualize the distributions of some of the string/character variables in this dataset.
+
+```{r histograms}
+p1 <- ggplot(data = train_data, aes(int_rate, fill = repay_fail)) +
+  geom_histogram(binwidth=5)
+
+p2 <- ggplot(data = train_data, mapping = aes(x = verification_status, y = annual_inc)) +
+  geom_boxplot() +
+  theme_bw()
+
+p3 <- ggplot(data = train_data, mapping = aes(x = repay_fail, y = loan_amnt)) +
+  geom_boxplot() +
+  theme_bw()
+
+p4 <- ggplot(data = train_data, mapping = aes(x = repay_fail, y = annual_inc)) +
+  geom_boxplot() +
+  theme_bw()
+
+p5 <- ggplot(data = train_data, mapping = aes(x = annual_inc, y = loan_amnt)) +
+  geom_point() +
+  theme_bw()
+
+ggarrange(p1, p2)
+ggarrange(p3, p4)
+ggarrange(p5)
+```
+
+Now, we create a plot that depicts the correlation between the different numeric variables; it includes both correlation coefficients and visuals of the distribution of each included variable.
 
 ```{r ggpairs_plot}
 # create ggpairs plot with the specified columns
@@ -112,32 +161,32 @@ ggpairs_plot
 Below, we create a correlation matrix of the numeric variables to help us understand the relationship between the different numeric variables.
 
 ```{r corr_matrix}
-# correlation matrix
+
 ```
 
 # New Credit Risk Model
 
 ```{r pois}
-#Full model with all possible interactions for backwards selection:
-full_interaction_model <- glm(data = train_data,
-    formula = repay_fail ~ loan_amnt* term * int_rate * emp_length * home_ownership * annual_inc *
-      verification_status * purpose * dti * delinq_2yrs * inq_last_6mths * open_acc * pub_rec *
-      revol_bal * revol_util * total_acc * credit_age_yrs,
-    family = "binomial")
-
-#Model with no variables present for forwards selection:
-null_model <- glm(data = train_data,
-    formula = repay_fail ~ 1,
-    family = "binomial")
-
-#Perform backward and forward selection:
-backward_sel_model <- stepAIC(
-  full_interaction_model, direction = "backward",trace = 0)
-forward_sel_model <- stepAIC(
-  null_model,
-  scope = formula(full_interaction_model), 
-  direction = "forward",
-  trace = 0) ## trace = 0 prevents automatic output of stepAIC function.
+# #Full model with all possible interactions for backwards selection:
+# full_interaction_model <- glm(data = train_data,
+#     formula = repay_fail ~ loan_amnt* term * int_rate * emp_length * home_ownership * annual_inc *
+#       verification_status * purpose * dti * delinq_2yrs * inq_last_6mths * open_acc * pub_rec *
+#       revol_bal * revol_util * total_acc * credit_age_yrs,
+#     family = "binomial")
+# 
+# #Model with no variables present for forwards selection:
+# null_model <- glm(data = train_data,
+#     formula = repay_fail ~ 1,
+#     family = "binomial")
+# 
+# #Perform backward and forward selection:
+# backward_sel_model <- stepAIC(
+#   full_interaction_model, direction = "backward",trace = 0)
+# forward_sel_model <- stepAIC(
+#   null_model,
+#   scope = formula(full_interaction_model), 
+#   direction = "forward",
+#   trace = 0) ## trace = 0 prevents automatic output of stepAIC function.
 ```
 
 
