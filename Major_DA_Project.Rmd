@@ -64,10 +64,10 @@ Note: For this exploration portion of our analysis, we will be using the trainin
 We will first explore the training dataset to understand its structure and the variables it is comprised of.
 
 ```{r head_data}
-head(train_data, 10)
+head(train_data)
 ```
 
-At first glance of the first 10 rows of this dataset, we notice there is a value of n/a in the employment length column. There are also a few zero values in a few columns. This will prompt us to further explore the data for any true missing values.
+At first glance of the first 6 rows of this dataset, we notice there is a value of n/a in the employment length column. There are also a few zero values in a few columns. This will prompt us to further explore the data for any true missing values.
 
 ```{r data_dim}
 dim(train_data)
@@ -100,7 +100,8 @@ sum(train_data == 'n/a')
 ```
 
 ```{r string_na_rows}
-train_data %>% filter_all(any_vars(. %in% c('n/a')))
+na_rows <- train_data %>% filter_all(any_vars(. %in% c('n/a')))
+head(na_rows)
 ```
 
 Based on the above output, there are a total of 591 n/a (string) in this dataset. These all appear to be from the employment length column. We will move forward and assume that this is not truly missing data, but rather, means that the applicant is not currently employed. We will further examine the ditribution of each variable by creating exploratory plots, and this will further clarify the meaning of some of the values contained within each column of the dataset.
@@ -155,7 +156,7 @@ ggpairs_plot <- ggpairs(train_data[, c("loan_amnt","int_rate", "annual_inc", "dt
                                       "credit_age_yrs")],
                         progress = FALSE)
 
-ggpairs_plot
+#ggpairs_plot
 ```
 
 Below, we create a correlation matrix of the numeric variables to help us understand the relationship between the different numeric variables.
