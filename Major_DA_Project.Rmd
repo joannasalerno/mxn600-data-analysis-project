@@ -120,6 +120,13 @@ train_data$purpose <- as.factor(train_data$purpose)
 train_data$repay_fail <- as.factor(train_data$repay_fail)
 ```
 
+```{r check_imbalance_data}
+
+plot(train_data$repay_fail)
+
+```
+Despite the significant class imbalance in the dataset, logistic regression still maintains its probabilistic nature. However, it's important to note that imbalanced data can affect the model's predictive performance, potentially leading to a bias towards the majority class.
+
 Now, we will create some histograms to visualize the distributions of some of the string/character variables in this dataset.
 
 ```{r histograms}
