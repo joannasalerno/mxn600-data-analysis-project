@@ -227,12 +227,13 @@ ggcorr(corr_matrix, type = "lower", hjust = 1, size = 3, color = "grey")
 #   trace = 0) ## trace = 0 prevents automatic output of stepAIC function.
 ```
 
+The correlation matrix (Heatmap) shows that:
 open_acc and total_acc have high positive correlation, so will keep total_acc and remove open_acc.
 revol_util and int_rate have high positive correlation, so will keep int_rate and revol_util will be removed
 
-Based on Five Cs Credit information and considering Correlation between variales below are the predictors more important to assess the risk whether the creditor will default on a loan:
+Based on the [Five Cs of Credit](https://www.investopedia.com/ask/answers/040115/what-most-important-c-five-cs-credit.asp) information and considering Correlation between variales below are the predictors more important to assess the risk whether the creditor will default on a loan:
 
- annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs.
+annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs.
  
 Stepwise AIC technique is used to find the best model:
       
