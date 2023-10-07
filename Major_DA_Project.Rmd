@@ -189,7 +189,7 @@ ggpairs_plot <- ggpairs(train_data[, c("loan_amnt","int_rate", "annual_inc", "dt
 Below, we create a correlation matrix of the numeric variables to help us understand the relationship between the different numeric variables.
 
 ```{r corr_matrix}
-columns <- c("loan_amnt", "annual_inc", "dti", "delinq_2yrs", "inq_last_6mths", "open_acc", "pub_rec", "revol_util", "revol_bal", "total_acc", "credit_age_yrs")
+columns <- c("loan_amnt", "annual_inc", "dti", "delinq_2yrs", "inq_last_6mths", "open_acc", "pub_rec", "revol_util", "revol_bal", "total_acc", "credit_age_yrs","int_rate")
 corr_matrix <- cor(train_data[columns], method = "pearson")
 ggcorr(corr_matrix, type = "lower", hjust = 1, size = 3, color = "grey")
 ```
