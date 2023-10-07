@@ -146,24 +146,32 @@ ggarrange(p3, p4)
 ggarrange(p5)
 ```
 
-Here we create some distribution plots to have a better visualization of the data
-```{r}
-numeric_vars <- c("loan_amnt", "annual_inc", "dti", "delinq_2yrs", "inq_last_6mths", "open_acc", "pub_rec", "revol_util", "revol_bal", "total_acc", "credit_age_yrs")
-par(mfrow=c(3,3))
-for (var in numeric_vars) {
-  hist(training_data[[var]], main=var, xlab=var)
-}
+Here we create some distribution plots to have a better visualization of the data:
 
-ggplot(training_data, aes(x = purpose)) +
+```{r dist_plots_1}
+numeric_vars <- c("loan_amnt", "annual_inc", "dti", "delinq_2yrs", "inq_last_6mths",
+                  "open_acc", "pub_rec", "revol_util", "revol_bal", "total_acc",
+                  "credit_age_yrs")
+par(mfrow=c(3,4))
+for (var in numeric_vars) {
+  hist(train_data[[var]], main=var, xlab=var)
+}
+```
+
+```{r dist_plots_2}
+ggplot(train_data, aes(x = purpose)) +
   geom_bar() +
   labs(x = "Purpose", y = "Frequency") + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
 
-ggplot(training_data, aes(x = term, y = loan_amnt)) +
+```{r dist_plots_3}
+ggplot(train_data, aes(x = term, y = loan_amnt)) +
   geom_boxplot() +
   labs(x = "Term", y = "Loan Amount")
-
 ```
+
+*** EXPLAIN PLOTS ***
 
 Now, we create a plot that depicts the correlation between the different numeric variables; it includes both correlation coefficients and visuals of the distribution of each included variable.
 
@@ -184,7 +192,6 @@ Below, we create a correlation matrix of the numeric variables to help us unders
 columns <- c("loan_amnt", "annual_inc", "dti", "delinq_2yrs", "inq_last_6mths", "open_acc", "pub_rec", "revol_util", "revol_bal", "total_acc", "credit_age_yrs")
 corr_matrix <- cor(train_data[columns], method = "pearson")
 ggcorr(corr_matrix, type = "lower", hjust = 1, size = 3, color = "grey")
-
 ```
 
 # New Credit Risk Model
