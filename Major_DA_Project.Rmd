@@ -8,7 +8,7 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
----Fernanda Test--
+
 # Introduction
 
 The credit risk models our lending start up company uses are of the utmost importance to the functioning and ultimate success of the company. As we were recently acquired by a regional Australian bank, the success of our company also impacts the success of the bank. Recently, some of the bank's senior financial analysts have raised concerns about the credit risk models we have been using. They reviewed our models' performance benchmarks and feel as though our models are not suitable for use in a setting in which they are subject to strict regulatory requirements.
@@ -146,6 +146,25 @@ ggarrange(p3, p4)
 ggarrange(p5)
 ```
 
+Here we create some distribution plots to have a better visualization of the data
+```{r}
+numeric_vars <- c("loan_amnt", "annual_inc", "dti", "delinq_2yrs", "inq_last_6mths", "open_acc", "pub_rec", "revol_util", "revol_bal", "total_acc", "credit_age_yrs")
+par(mfrow=c(3,3))
+for (var in numeric_vars) {
+  hist(training_data[[var]], main=var, xlab=var)
+}
+
+ggplot(training_data, aes(x = purpose)) +
+  geom_bar() +
+  labs(x = "Purpose", y = "Frequency") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(training_data, aes(x = term, y = loan_amnt)) +
+  geom_boxplot() +
+  labs(x = "Term", y = "Loan Amount")
+
+```
+
 Now, we create a plot that depicts the correlation between the different numeric variables; it includes both correlation coefficients and visuals of the distribution of each included variable.
 
 ```{r ggpairs_plot}
@@ -162,6 +181,9 @@ ggpairs_plot <- ggpairs(train_data[, c("loan_amnt","int_rate", "annual_inc", "dt
 Below, we create a correlation matrix of the numeric variables to help us understand the relationship between the different numeric variables.
 
 ```{r corr_matrix}
+columns <- c("loan_amnt", "annual_inc", "dti", "delinq_2yrs", "inq_last_6mths", "open_acc", "pub_rec", "revol_util", "revol_bal", "total_acc", "credit_age_yrs")
+corr_matrix <- cor(train_data[columns], method = "pearson")
+ggcorr(corr_matrix, type = "lower", hjust = 1, size = 3, color = "grey")
 
 ```
 
