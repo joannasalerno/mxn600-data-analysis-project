@@ -282,6 +282,7 @@ plot(res)
 
 library(pROC)
 
+#ROC curve on train data 
 prob=predict(fit2,type=c("response"))
 g <- roc(train_data$repay_fail ~ prob)
 AUC <- g$auc
@@ -294,11 +295,13 @@ plot(g)
 ```
 
 ```{r}
-fit_val <- glm(formula = repay_fail ~ term * int_rate + emp_length + home_ownership + annual_inc + purpose + inq_last_6mths +                  pub_rec + revol_bal + revol_util,
+fit_val <- glm(formula = repay_fail ~ annual_inc + emp_length + verification_status + dti + credit_age_yrs + home_ownership + 
+      total_acc + revol_bal + int_rate + term + purpose + loan_amnt + inq_last_6mths + delinq_2yrs,
             data = val_data,
             family = "binomial"
     )
 
+#ROC curve on validation data 
 prob=predict(fit_val,type=c("response"))
 g <- roc(val_data$repay_fail ~ prob)
 AUC <- g$auc
