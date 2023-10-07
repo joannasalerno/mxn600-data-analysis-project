@@ -39,6 +39,7 @@ library(MASS)
 library(GGally)
 library(lme4)
 library(lmerTest)
+library(DHARMa)
 ```
 
 Next, we will load in our datasets. We have a total of 4:
@@ -218,6 +219,86 @@ ggcorr(corr_matrix, type = "lower", hjust = 1, size = 3, color = "grey")
 #   direction = "forward",
 #   trace = 0) ## trace = 0 prevents automatic output of stepAIC function.
 ```
+
+open_acc and total_acc have high positive correlation, so will keep total_acc and remove open_acc.
+revol_util and int_rate have high positive correlation, so will keep int_rate and revol_util will be removed
+
+Based on Five Cs Credit information and considering Correlation between variales below are the variables more important to assess the risk whether the creditor will default on a loan:
+
+repay_fail ~ annual_inc * emp_length * verification_status * dti * credit_age_yrs * home_ownership * 
+      total_acc * revol_bal * int_rate * term * purpose * loan_amnt * inq_last_6mths * delinq_2yrs,
+      
+```{r pois}
+#Full model with all possible interactions for backwards selection:
+full_interaction_model <- glm(data = train_data,
+    formula = repay_fail ~ annual_inc * emp_length * verification_status * dti * credit_age_yrs * home_ownership *
+      total_acc * revol_bal * int_rate * term * purpose * loan_amnt * inq_last_6mths * delinq_2yrs,
+    family = "binomial")
+
+#Model with no variables present for forwards selection:
+null_model <- glm(data = train_data,
+    formula = repay_fail ~ 1,
+    family = "binomial")
+
+#Perform backward and forward selection:
+backward_sel_model <- stepAIC(
+  full_interaction_model, direction = "backward",trace = 0)
+forward_sel_model <- stepAIC(
+  null_model,
+  scope = formula(full_interaction_model),
+  direction = "forward",
+  trace = 0) ## trace = 0 prevents automatic output of stepAIC function.
+```
+
+
+```{r}
+fit2 <- glm(data = train_data,
+    formula = repay_fail ~ annual_inc + emp_length + verification_status + dti + credit_age_yrs + home_ownership + 
+      total_acc + revol_bal + int_rate + term + purpose + loan_amnt + inq_last_6mths + delinq_2yrs,
+    family = "binomial")
+
+AIC(fit2)
+```
+
+```{r,include=TRUE}
+#Simulate residuals from the model:
+res = simulateResiduals(fit2)
+
+#Plot observed quantile versus expected quantile to assess distribution fit, and predicted value versus standardised residuals for unmodelled pattern in the residuals.
+plot(res)
+```
+
+```{r}
+#install.packages("pROC")
+
+library(pROC)
+
+prob=predict(fit2,type=c("response"))
+g <- roc(train_data$repay_fail ~ prob)
+AUC <- g$auc
+AUC
+Gini <- 2*(AUC - 1/2)
+Gini
+plot(g)
+
+
+```
+
+```{r}
+fit_val <- glm(formula = repay_fail ~ term * int_rate + emp_length + home_ownership + annual_inc + purpose + inq_last_6mths +                  pub_rec + revol_bal + revol_util,
+            data = val_data,
+            family = "binomial"
+    )
+
+prob=predict(fit_val,type=c("response"))
+g <- roc(val_data$repay_fail ~ prob)
+AUC <- g$auc
+AUC
+Gini <- 2*(AUC - 1/2)
+Gini
+plot(g)
+```
+
 
 
 # Extended Credit Risk Model
