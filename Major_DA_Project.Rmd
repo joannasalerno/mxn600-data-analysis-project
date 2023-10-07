@@ -230,10 +230,11 @@ ggcorr(corr_matrix, type = "lower", hjust = 1, size = 3, color = "grey")
 open_acc and total_acc have high positive correlation, so will keep total_acc and remove open_acc.
 revol_util and int_rate have high positive correlation, so will keep int_rate and revol_util will be removed
 
-Based on Five Cs Credit information and considering Correlation between variales below are the variables more important to assess the risk whether the creditor will default on a loan:
+Based on Five Cs Credit information and considering Correlation between variales below are the predictors more important to assess the risk whether the creditor will default on a loan:
 
-repay_fail ~ annual_inc * emp_length * verification_status * dti * credit_age_yrs * home_ownership * 
-      total_acc * revol_bal * int_rate * term * purpose * loan_amnt * inq_last_6mths * delinq_2yrs,
+ annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs.
+ 
+Stepwise AIC technique is used to find the best model:
       
 ```{r pois}
 #Full model with all possible interactions for backwards selection:
@@ -305,7 +306,11 @@ Gini <- 2*(AUC - 1/2)
 Gini
 plot(g)
 ```
+## quassi Link Function
 
+## Probit Link Function
+
+## cloglog Link Function
 
 
 # Extended Credit Risk Model
