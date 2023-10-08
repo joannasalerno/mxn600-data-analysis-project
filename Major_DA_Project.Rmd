@@ -249,13 +249,25 @@ Based on the [Five Cs of Credit](https://www.investopedia.com/ask/answers/040115
 
 annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs.
  
+ 
+```{r standardisation}
+train_data$annual_inc2 <- scale(train_data$annual_inc)
+train_data$loan_amnt2 <- scale(train_data$loan_amnt)
+train_data$revol_bal2 <- scale(train_data$revol_bal)
+#train_data$credit_age_yrs <- scale(train_data$credit_age_yrs)
+
+#summary(train_data)
+#str(train_data)
+```
+
 Stepwise AIC technique is used to find the best model:
 
-```{r pois}
+```{r stepwiseAIC for GLM}
+
 #Full model with all possible interactions for backwards selection:
 full_interaction_model <- glm(data = train_data,
-    formula = repay_fail ~ annual_inc * emp_length * verification_status * dti * credit_age_yrs * home_ownership *
-      total_acc * revol_bal * int_rate * term * purpose * loan_amnt * inq_last_6mths * delinq_2yrs,
+    formula = repay_fail ~ annual_inc2 * emp_length * verification_status * dti * credit_age_yrs * home_ownership *
+      total_acc * revol_bal2 * int_rate * term * purpose * loan_amnt2 * inq_last_6mths * delinq_2yrs,
     family = "binomial")
 
 #Model with no variables present for forwards selection:
@@ -277,8 +289,8 @@ forward_sel_model <- stepAIC(
 ```{r}
 
 fit2 <- glm(data = train_data,
-    formula = repay_fail ~ annual_inc + emp_length + verification_status + dti + credit_age_yrs + home_ownership +
-      total_acc + revol_bal + int_rate + term + purpose + loan_amnt + inq_last_6mths + delinq_2yrs,
+    formula = repay_fail ~ annual_inc2 + emp_length + verification_status + dti + credit_age_yrs + home_ownership +
+      total_acc + revol_bal2 + int_rate + term + purpose + loan_amnt2 + inq_last_6mths + delinq_2yrs,
     family = "binomial")
 
  AIC(fit2)
