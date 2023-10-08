@@ -40,6 +40,8 @@ library(GGally)
 library(lme4)
 library(lmerTest)
 library(DHARMa)
+library(pROC)
+
 ```
 
 Next, we will load in our datasets. We have a total of 4:
@@ -273,12 +275,13 @@ forward_sel_model <- stepAIC(
 
 
 ```{r}
+
 fit2 <- glm(data = train_data,
-    formula = repay_fail ~ annual_inc + emp_length + verification_status + dti + credit_age_yrs + home_ownership + 
+    formula = repay_fail ~ annual_inc + emp_length + verification_status + dti + credit_age_yrs + home_ownership +
       total_acc + revol_bal + int_rate + term + purpose + loan_amnt + inq_last_6mths + delinq_2yrs,
     family = "binomial")
 
-AIC(fit2)
+ AIC(fit2)
 ```
 
 ```{r,include=TRUE}
@@ -290,9 +293,6 @@ plot(res)
 ```
 
 ```{r}
-#install.packages("pROC")
-
-library(pROC)
 
 #ROC curve on train data 
 prob=predict(fit2,type=c("response"))
@@ -322,7 +322,7 @@ Gini <- 2*(AUC - 1/2)
 Gini
 plot(g)
 ```
-## quassi Link Function
+## quasibinomial Link Function
 
 ## Probit Link Function
 
