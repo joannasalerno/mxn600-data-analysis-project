@@ -153,6 +153,16 @@ ggarrange(p1, p2)
 ggarrange(p3, p4)
 ggarrange(p5)
 ```
+Explanation: 
+Plot1 is a histogram that displays the distribution of interest rates in the dataset. The bars in the histogram are filled based on whether the loan was repaid successfully or not, where fill colours represent the two categories 0 for no failure and 1 for failure of loan repayment. Based on the plot, a trend can be seen that as the interest rate increases so does the chances of loan repayment failures.
+
+Plot2 is a boxplot that shows the distribution of annual incomes based on different verification statuses. Each box represent a category of verification status. Based on the plot, we can see that we have similar sized boxes for all three categories which suggests that the median income for applicants in these categories is relatively consistent. However, we can see the presence of outlier in all three verification_status categories indicating that there are individuals with very high income within each group.
+
+Plot3 is a boxplot that compares the loan amounts for both successfull and unsuccessfull loan repayments. Based on the plot, it can be seen that the median loan amount for both categories of loan repayment status are more or less consistent. The presence of outlier in both categories indicates that there are individuals with very high loan amount within each group. 
+
+Plot4 is a boxplot that compares annual income between successful and unsuccessful loan repayments. Based on the plot it can be seen that most individuals that successfully paid off their loans are more or less consistent with the ones who failed with an exception of ouliers in both categories.
+
+Plot5 is scatter plot that displays relationship annual income and loan amount. 
 
 Here we create some distribution plots to have a better visualization of the data:
 
@@ -165,6 +175,7 @@ for (var in numeric_vars) {
   hist(train_data[[var]], main=var, xlab=var)
 }
 ```
+The above plot displays the distribution of all numeric variables in the dataset in the form of a histogram. 
 
 ```{r dist_plots_2}
 ggplot(train_data, aes(x = purpose)) +
@@ -172,14 +183,15 @@ ggplot(train_data, aes(x = purpose)) +
   labs(x = "Purpose", y = "Frequency") + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+The above bar plot represents the frequency of each unique value in the purpose variable. From the plot it can be seen that the most common reasons to take loans are debt_consolidation, credit_card, home_improvement and car.
 
 ```{r dist_plots_3}
 ggplot(train_data, aes(x = term, y = loan_amnt)) +
   geom_boxplot() +
   labs(x = "Term", y = "Loan Amount")
 ```
+The above plot consists of two side-by-side boxplots, one for each loan term category. Each boxplot provides information about the distribution of loan amounts for its respective term category. Based on the plot, we can see that, on average, loans with 60 months term have higher loan amounts than those with a 36 month term which is an expected behaviour. Also, we can observe some outliers in the 36 months term which indicates that there are a few loan amounts significantly higher than the typical range of loan amounts for that category.
 
-*** EXPLAIN PLOTS ***
 
 Now, we create a plot that depicts the correlation between the different numeric variables; it includes both correlation coefficients and visuals of the distribution of each included variable.
 
@@ -236,7 +248,7 @@ Based on the [Five Cs of Credit](https://www.investopedia.com/ask/answers/040115
 annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs.
  
 Stepwise AIC technique is used to find the best model:
-      
+
 ```{r pois}
 #Full model with all possible interactions for backwards selection:
 full_interaction_model <- glm(data = train_data,
