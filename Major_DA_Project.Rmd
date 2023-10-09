@@ -41,6 +41,7 @@ library(lme4)
 library(lmerTest)
 library(DHARMa)
 library(pROC)
+library(dplyr)
 
 ```
 
@@ -83,6 +84,14 @@ str(train_data)
 ```
 
 Upon further investigation of the structure of the training data, we can see that 14 of the 19 variables are currently of numeric type, and the remaining 5 variables are characters. We will now further investigate each variable to determine whether there is any missing data or outliers.
+
+```{r remove variable X from all datasets}
+train_data <- train_data[, -1]
+val_data <- val_data[, -1]
+test_data <- test_data[, -1]
+extended <- extended[, -1]
+```
+Variable X which is the number of each record is removed from all datasets.
 
 ```{r data_summary}
 summary(train_data)
@@ -251,54 +260,58 @@ annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership
  
  
 ```{r standardisation}
-train_data$annual_inc2 <- scale(train_data$annual_inc)
-train_data$loan_amnt2 <- scale(train_data$loan_amnt)
-train_data$revol_bal2 <- scale(train_data$revol_bal)
-#train_data$credit_age_yrs <- scale(train_data$credit_age_yrs)
 
-#summary(train_data)
-#str(train_data)
+numeric_columns <- sapply(train_data, is.numeric)  # Identify numeric columns
+
+# Scale the numeric columns while keeping column names
+train_data[, numeric_columns] <- scale(train_data[, numeric_columns])
+
+train_scaled_data <- train_data %>%
+  mutate_if(is.numeric, scale)
+
+#names(train_scaled_data)
+#summary(train_scaled_data)
 ```
 
 Stepwise AIC technique is used to find the best model:
 
 ```{r stepwiseAIC for GLM}
-
-#Full model with all possible interactions for backwards selection:
-full_interaction_model <- glm(data = train_data,
-    formula = repay_fail ~ annual_inc2 * emp_length * verification_status * dti * credit_age_yrs * home_ownership *
-      total_acc * revol_bal2 * int_rate * term * purpose * loan_amnt2 * inq_last_6mths * delinq_2yrs,
-    family = "binomial")
-
-#Model with no variables present for forwards selection:
-null_model <- glm(data = train_data,
-    formula = repay_fail ~ 1,
-    family = "binomial")
-
-#Perform backward and forward selection:
-backward_sel_model <- stepAIC(
-  full_interaction_model, direction = "backward",trace = 0)
-forward_sel_model <- stepAIC(
-  null_model,
-  scope = formula(full_interaction_model),
-  direction = "forward",
-  trace = 0) ## trace = 0 prevents automatic output of stepAIC function.
+# 
+# #Full model with all possible interactions for backwards selection:
+# full_interaction_model <- glm(data = train_scaled_data,
+#     formula = repay_fail ~ annual_inc2 * emp_length * verification_status * dti * credit_age_yrs * home_ownership *
+#       total_acc * revol_bal2 * int_rate * term * purpose * loan_amnt2 * inq_last_6mths * delinq_2yrs,
+#     family = "binomial")
+# 
+# #Model with no variables present for forwards selection:
+# null_model <- glm(data = train_scaled_data,
+#     formula = repay_fail ~ 1,
+#     family = "binomial")
+# 
+# #Perform backward and forward selection:
+# backward_sel_model <- stepAIC(
+#   full_interaction_model, direction = "backward",trace = 0)
+# forward_sel_model <- stepAIC(
+#   null_model,
+#   scope = formula(full_interaction_model),
+#   direction = "forward",
+#   trace = 0) ## trace = 0 prevents automatic output of stepAIC function.
 ```
 
 
 ```{r}
 
-fit2 <- glm(data = train_data,
-    formula = repay_fail ~ annual_inc2 + emp_length + verification_status + dti + credit_age_yrs + home_ownership +
-      total_acc + revol_bal2 + int_rate + term + purpose + loan_amnt2 + inq_last_6mths + delinq_2yrs,
+fit_logit <- glm(data = train_scaled_data,
+    formula = repay_fail ~ annual_inc + emp_length + verification_status + dti + credit_age_yrs + home_ownership +
+      total_acc + revol_bal + int_rate + term + purpose + loan_amnt + inq_last_6mths + delinq_2yrs,
     family = "binomial")
 
- AIC(fit2)
+ AIC(fit_logit)
 ```
 
 ```{r,include=TRUE}
 #Simulate residuals from the model:
-res = simulateResiduals(fit2)
+res = simulateResiduals(fit_logit)
 
 #Plot observed quantile versus expected quantile to assess distribution fit, and predicted value versus standardised residuals for unmodelled pattern in the residuals.
 plot(res)
@@ -307,7 +320,7 @@ plot(res)
 ```{r}
 
 #ROC curve on train data 
-prob=predict(fit2,type=c("response"))
+prob=predict(fit_logit,type=c("response"))
 g <- roc(train_data$repay_fail ~ prob)
 AUC <- g$auc
 AUC
@@ -319,14 +332,14 @@ plot(g)
 ```
 
 ```{r}
-fit_val <- glm(formula = repay_fail ~ annual_inc + emp_length + verification_status + dti + credit_age_yrs + home_ownership + 
+fit_logit_val <- glm(formula = repay_fail ~ annual_inc + emp_length + verification_status + dti + credit_age_yrs + home_ownership + 
       total_acc + revol_bal + int_rate + term + purpose + loan_amnt + inq_last_6mths + delinq_2yrs,
             data = val_data,
             family = "binomial"
     )
 
 #ROC curve on validation data 
-prob=predict(fit_val,type=c("response"))
+prob=predict(fit_logit_val,type=c("response"))
 g <- roc(val_data$repay_fail ~ prob)
 AUC <- g$auc
 AUC
