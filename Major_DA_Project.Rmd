@@ -42,7 +42,6 @@ library(lmerTest)
 library(DHARMa)
 library(pROC)
 library(dplyr)
-
 ```
 
 Next, we will load in our datasets. We have a total of 4:
@@ -83,15 +82,18 @@ The training dataset contains a total of 23,052 observations of 19 variables.
 str(train_data)
 ```
 
-Upon further investigation of the structure of the training data, we can see that 14 of the 19 variables are currently of numeric type, and the remaining 5 variables are characters. We will now further investigate each variable to determine whether there is any missing data or outliers.
+Upon further investigation of the structure of the training data, we can see that 14 of the 19 variables are currently of numeric type, and the remaining 5 variables are characters.
 
-```{r remove variable X from all datasets}
+We will now remove variable X, which is the number of each record, from all datasets, as it is not necessayr for this analysis.
+
+```{r remove_X_from_datasets}
 train_data <- train_data[, -1]
 val_data <- val_data[, -1]
 test_data <- test_data[, -1]
 extended <- extended[, -1]
 ```
-Variable X which is the number of each record is removed from all datasets.
+
+We will now further investigate each variable to determine whether there is any missing data or outliers.
 
 ```{r data_summary}
 summary(train_data)
@@ -122,7 +124,7 @@ Based on the above output, there are a total of 591 n/a (string) in this dataset
 
 Before we can create exploratory plots, there are a few variables we will need to convert to factors. This will help us in creating our visualizations as well as conducting our analyses, so we can consider the selected variables as factors with different levels rather than simply strings.
 
-```{r convert_vars_to_factors}
+```{r convert_vars_to_factors_train}
 train_data$term <- as.factor(train_data$term)
 train_data$emp_length <- as.factor(train_data$emp_length)
 train_data$home_ownership <- as.factor(train_data$home_ownership)
@@ -131,7 +133,7 @@ train_data$purpose <- as.factor(train_data$purpose)
 train_data$repay_fail <- as.factor(train_data$repay_fail)
 ```
 
-```{r convert_vars_to_factors}
+```{r convert_vars_to_factors_val}
 val_data$term <- as.factor(val_data$term)
 val_data$emp_length <- as.factor(val_data$emp_length)
 val_data$home_ownership <- as.factor(val_data$home_ownership)
@@ -141,10 +143,9 @@ val_data$repay_fail <- as.factor(val_data$repay_fail)
 ```
 
 ```{r check_imbalance_data}
-
 plot(train_data$repay_fail)
-
 ```
+
 Despite the significant class imbalance in the dataset, logistic regression still maintains its probabilistic nature. However, it's important to note that imbalanced data can affect the model's predictive performance, potentially leading to a bias towards the majority class.
 
 Now, we will create some histograms to visualize the distributions of some of the string/character variables in this dataset.
@@ -173,7 +174,8 @@ ggarrange(p1, p2)
 ggarrange(p3, p4)
 ggarrange(p5)
 ```
-Explanation: 
+Explanations: 
+
 Plot1 is a histogram that displays the distribution of interest rates in the dataset. The bars in the histogram are filled based on whether the loan was repaid successfully or not, where fill colours represent the two categories 0 for no failure and 1 for failure of loan repayment. Based on the plot, a trend can be seen that as the interest rate increases so does the chances of loan repayment failures.
 
 Plot2 is a boxplot that shows the distribution of annual incomes based on different verification statuses. Each box represent a category of verification status. Based on the plot, we can see that we have similar sized boxes for all three categories which suggests that the median income for applicants in these categories is relatively consistent. However, we can see the presence of outlier in all three verification_status categories indicating that there are individuals with very high income within each group.
@@ -203,6 +205,7 @@ ggplot(train_data, aes(x = purpose)) +
   labs(x = "Purpose", y = "Frequency") + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
 The above bar plot represents the frequency of each unique value in the purpose variable. From the plot it can be seen that the most common reasons to take loans are debt_consolidation, credit_card, home_improvement and car.
 
 ```{r dist_plots_3}
@@ -210,10 +213,10 @@ ggplot(train_data, aes(x = term, y = loan_amnt)) +
   geom_boxplot() +
   labs(x = "Term", y = "Loan Amount")
 ```
+
 The above plot consists of two side-by-side boxplots, one for each loan term category. Each boxplot provides information about the distribution of loan amounts for its respective term category. Based on the plot, we can see that, on average, loans with 60 months term have higher loan amounts than those with a 36 month term which is an expected behaviour. Also, we can observe some outliers in the 36 months term which indicates that there are a few loan amounts significantly higher than the typical range of loan amounts for that category.
 
-
-Now, we create a plot that depicts the correlation between the different numeric variables; it includes both correlation coefficients and visuals of the distribution of each included variable.
+Now, we will create a plot that depicts the correlation between the different numeric variables; it includes both correlation coefficients and visuals of the distribution of each included variable.
 
 ```{r ggpairs_plot}
 # create ggpairs plot with the specified columns
@@ -234,19 +237,22 @@ corr_matrix <- cor(train_data[columns], method = "pearson")
 ggcorr(corr_matrix, type = "lower", hjust = 1, size = 3, color = "grey")
 ```
 
+*** ADD EXPLANATION
+
 # New Credit Risk Model
 
 The correlation matrix (Heatmap) shows that:
-open_acc and total_acc have high positive correlation, so will keep total_acc and remove open_acc.
-revol_util and int_rate have high positive correlation, so will keep int_rate and revol_util will be removed
+
+* open_acc and total_acc are strongly positively correlated, so we will keep total_acc and remove open_acc
+* revol_util and int_rate are strongly positively correlated, so we will keep int_rate and revol_util will be removed
 
 Based on the [Five Cs of Credit](https://www.investopedia.com/ask/answers/040115/what-most-important-c-five-cs-credit.asp) information and considering Correlation between variales below are the predictors more important to assess the risk whether the creditor will default on a loan:
 
-annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs.
- 
- 
-```{r standardisation}
+annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs
 
+Now, we'll standardize our numeric variables so that they can be accurately compared:
+
+```{r standardisation}
 numeric_columns <- sapply(train_data, is.numeric)  # Identify numeric columns
 
 # Scale the numeric columns while keeping column names
@@ -254,14 +260,14 @@ train_data[, numeric_columns] <- scale(train_data[, numeric_columns])
 
 train_scaled_data <- train_data %>%
   mutate_if(is.numeric, scale)
-
 ```
 
+Fit first logit model:
 
 ```{r}
-
-fit_logit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
-    data = train_scaled_data, family = binomial) #18156.43
+fit_logit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + 
+                   inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
+                 data = train_scaled_data, family = binomial) #18156.43
 
  AIC(fit_logit)
 ```
@@ -290,12 +296,9 @@ AUC
 Gini <- 2*(AUC - 1/2)
 Gini
 plot(g)
-
-
 ```
 
 ```{r}
-
 # fit_logit_val <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
 #     data = val_data, family = binomial)
 
@@ -350,7 +353,8 @@ fit_probit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + in
 
  AIC(fit_probit)
 ```
-## cloglog Link Function
+
+## Cloglog Link Function
 ```{r}
 
 fit_cloglog <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
@@ -392,6 +396,47 @@ plot(g)
 
 
 # Extended Credit Risk Model
+
+*** INTRO (motivation)
+
+```{r str_extended}
+str(extended)
+```
+
+First, we'll need to once again convert the relevant variables to factors. This time, this will include the new variables of zip_code and adddr_state:
+
+```{r convert_vars_to_factors_ext}
+extended$term <- as.factor(extended$term)
+extended$emp_length <- as.factor(extended$emp_length)
+extended$home_ownership <- as.factor(extended$home_ownership)
+extended$verification_status <- as.factor(extended$verification_status)
+extended$purpose <- as.factor(extended$purpose)
+extended$repay_fail <- as.factor(extended$repay_fail)
+extended$zip_code <- as.factor(extended$zip_code)
+extended$addr_state <- as.factor(extended$addr_state)
+```
+
+Rescale variables in extended dataset:
+
+```{r standardisation_ext}
+numeric_columns <- sapply(extended, is.numeric)  # Identify numeric columns
+
+# Scale the numeric columns while keeping column names
+extended[, numeric_columns] <- scale(extended[, numeric_columns])
+
+extended_scaled <- extended %>%
+  mutate_if(is.numeric, scale)
+```
+
+Fit first model:
+
+```{r extended_fit1}
+fit_var_1 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose + 
+                     inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate 
+                   + (1|zip_code) + (1|addr_state),
+                   data = extended, family = binomial)
+```
+
 
 
 # Conclusion
