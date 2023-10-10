@@ -262,12 +262,22 @@ train_scaled_data <- train_data %>%
   mutate_if(is.numeric, scale)
 ```
 
+```{r standardisation}
+numeric_columns <- sapply(val_data, is.numeric)  # Identify numeric columns
+
+# Scale the numeric columns while keeping column names
+val_data[, numeric_columns] <- scale(val_data[, numeric_columns])
+
+val_scaled_data <- val_data %>%
+  mutate_if(is.numeric, scale)
+```
+
 Fit first logit model:
 
 ```{r}
 fit_logit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + 
                    inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
-                 data = train_scaled_data, family = binomial) #18156.43
+                 data = train_scaled_data, family = binomial) #18156.43 
 
  AIC(fit_logit)
 ```
@@ -299,50 +309,19 @@ plot(g)
 ```
 
 ```{r}
-# fit_logit_val <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
-#     data = val_data, family = binomial)
 
 
-pred.cv <- rep(0,80)
-for(i in 1:80){
-fit.cv <- glmer(guard~ttt+(1|block),data=new_culcita[-i,],
-             family=binomial)
-pred.cv[i] <- predict(fit.cv,newdata=new_culcita[i,])
-}
-pred.cv <- exp(pred.cv)/(1+exp(pred.cv))
-ind <- which(pred.cv>0.625)
-ycv <- rep(0,80)
-ycv[ind] <- 1
-table(new_culcita$guard,ycv)
-
-# pred <- as.numeric()
-# for(i in 1:length(val_data)){
-# temp <- val_data[-i,]
-# yntemp <- repay_fail[-i]
-# fit.cv <- glm(yntemp~temp,family="binomial",data=temp)
-# predlp <- predict(fit.cv,newdata=data.frame(temp=val_data$temp[i]))
-# pred[i] <- exp(predlp)/(1+exp(predlp))*repay_fail[i]
-# }
-
-# # Need to do some cross-validation
-# pred <- as.numeric()
-# for(i in 1:length(y)){
-# temp <- data.frame(y=y[-i],n=n[-i],dose=dose[-i],d2=d2[-i])
-# yntemp <- cbind(temp$y,temp$n-temp$y)
-# fit.cv <- glm(yntemp~dose + d2,family="binomial",data=temp)
-# predlp <- predict(fit.cv,newdata=data.frame(dose=dose[i],d2=d2[i]))
-# pred[i] <- exp(predlp)/(1+exp(predlp))*n[i]
-# }
-
-
-#ROC curve on validation data 
-prob=predict(fit_logit,type=c("response"))
+#ROC curve on validation data
+#pred <- predict(fit_logit,newdata=val_data),type=c("response"))
+prob=predict(fit_logit,newdata=val_scaled_data,type=c("response"))
 g <- roc(val_data$repay_fail ~ prob)
 AUC <- g$auc
 AUC
 Gini <- 2*(AUC - 1/2)
 Gini
 plot(g)
+
+
 ```
 
 ## Probit Link Function
@@ -428,13 +407,14 @@ extended_scaled <- extended %>%
   mutate_if(is.numeric, scale)
 ```
 
+
 Fit first model:
 
 ```{r extended_fit1}
-fit_var_1 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose + 
-                     inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate 
-                   + (1|zip_code) + (1|addr_state),
-                   data = extended, family = binomial)
+# fit_var_1 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose + 
+#                      inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate 
+#                    + (1|zip_code) + (1|addr_state),
+#                    data = extended, family = binomial)
 ```
 
 
