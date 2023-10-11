@@ -42,6 +42,7 @@ library(lmerTest)
 library(DHARMa)
 library(pROC)
 library(dplyr)
+library(broom.mixed)
 ```
 
 Next, we will load in our datasets. We have a total of 4:
@@ -366,6 +367,68 @@ fit_cloglog <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + i
  AIC(fit_cloglog)
 ```
 
+# Calculate Odds Ratio and CI for the Final model of GLM
+```{r odds ratio GLM}
+
+summary_logit <- summary(fit_logit)
+
+parameter_estimates <- summary_logit$coef[, "Estimate"]
+standard_errors <- summary_logit$coef[, "Std. Error"]
+
+# Calculate the odds ratios by exponentiating the parameter estimate values
+odds_ratios <- exp(parameter_estimates)
+
+# Calculate the confidence intervals for the odds ratios
+lower_ci <- exp(parameter_estimates - 1.96 * standard_errors)  # 1.96 corresponds to a 95% confidence interval
+upper_ci <- exp(parameter_estimates + 1.96 * standard_errors)
+
+model_results <- data.frame(
+  Estimate = parameter_estimates,
+  OddsRatio = odds_ratios,
+  LowerCI = lower_ci,
+  UpperCI = upper_ci
+)
+
+
+model_results
+```
+# Odds Ratio Plot for the Final model of GLM
+```{r odds ratio plot GLM}
+
+plot_data <- data.frame(
+  Variable = rownames(model_results),
+  OddsRatio = model_results$OddsRatio,
+  LowerCI = model_results$LowerCI,
+  UpperCI = model_results$UpperCI
+)
+
+ggplot(plot_data, aes(x = OddsRatio, xmin = LowerCI, xmax = UpperCI, y = Variable)) +
+  geom_point(size = 3, color="red") +
+  geom_errorbarh(height = 0.2, color = "blue") +
+  xlim(c(0, max(plot_data$UpperCI + 1))) +  
+  theme_minimal() +
+  labs(x = "Odds Ratio", y = "Variable") +
+  ggtitle("Plot of Odds Ratios with CI")
+
+
+```
+
+
+#Calculate Accuracy and Confusion Matrix for the Final Model of GLM
+```{r Accuracy and Confusion Matrix GLM}
+fit_logit <- ifelse(prob > 0.5,"1","0")
+
+fit_logit<-as.factor(fit_logit)
+
+require(caret)
+cm<-confusionMatrix(data=fit_logit,
+  reference=val_scaled_data$repay_fail)
+
+Accuracy<-round(cm$overall[1],2)
+Accuracy
+
+cm
+```
 # Extended Credit Risk Model
 
 *** INTRO (motivation)
