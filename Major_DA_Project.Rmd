@@ -409,7 +409,27 @@ fit_var_1 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
                    data = extended_scaled, family = binomial)
 ```
 
-The above model failed to converge. Now, we'll try to change the optimizer to 
+The above model failed to converge. Now, we'll try to change the optimizer to Nelder-Mead to see if this helps.
+
+```{r extended_fit2}
+fit_var_2 <- update(fit_var_1, control = glmerControl(optimizer = "Nelder_Mead"))
+```
+
+This second model also failed to converge, so we will now increase the number of iterations to see if this helps.
+
+```{r extended_fit3}
+fit_var_3 <- update(fit_var_2, control = glmerControl(optCtrl=list(maxfun=2e4)))
+```
+
+Increase iterations on fit 1:
+
+```{r extended_fit4}
+fit_var_4 <- update(fit_var_1, control = glmerControl(optCtrl=list(maxfun=2e4)))
+```
+
+```{r extended_fit5}
+# fit_var_5 <- update(fit_var_4, control = glmerControl(optimizer = "Nelder_Mead", tolPwrss = )
+```
 
 # Conclusion
 
