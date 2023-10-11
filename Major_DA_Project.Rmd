@@ -411,13 +411,13 @@ extended_scaled <- extended %>%
 Fit first model:
 
 ```{r extended_fit1}
-# fit_var_1 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose + 
-#                      inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate 
-#                    + (1|zip_code) + (1|addr_state),
-#                    data = extended, family = binomial)
+fit_var_1 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
+                     inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate
+                   + (1|zip_code),
+                   data = extended_scaled, family = binomial)
 ```
 
-
+The above model failed to converge. Now, we'll try to change the optimizer to 
 
 # Conclusion
 
