@@ -300,7 +300,7 @@ plot(res)
 
 #ROC curve on train data 
 prob=predict(fit_logit,type=c("response"))
-g <- roc(train_data$repay_fail ~ prob)
+g <- roc(train_scaled_data$repay_fail ~ prob)
 AUC <- g$auc
 AUC
 Gini <- 2*(AUC - 1/2)
@@ -309,12 +309,9 @@ plot(g)
 ```
 
 ```{r}
-
-
-#ROC curve on validation data
-#pred <- predict(fit_logit,newdata=val_data),type=c("response"))
+#ROC curve on scaled validation data
 prob=predict(fit_logit,newdata=val_scaled_data,type=c("response"))
-g <- roc(val_data$repay_fail ~ prob)
+g <- roc(val_scaled_data$repay_fail ~ prob)
 AUC <- g$auc
 AUC
 Gini <- 2*(AUC - 1/2)
@@ -333,6 +330,33 @@ fit_probit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + in
  AIC(fit_probit)
 ```
 
+
+```{r}
+#summary(fit_probit)
+```
+
+```{r}
+
+#ROC curve on train data 
+prob=predict(fit_probit,type=c("response"))
+g <- roc(train_scaled_data$repay_fail ~ prob)
+AUC <- g$auc
+AUC
+Gini <- 2*(AUC - 1/2)
+Gini
+plot(g)
+
+```
+```{r}
+#ROC curve on validation data 
+prob=predict(fit_probit,newdata = val_scaled_data,type=c("response"))
+g <- roc(val_scaled_data$repay_fail ~ prob)
+AUC <- g$auc
+AUC
+Gini <- 2*(AUC - 1/2)
+Gini
+plot(g)
+```
 ## Cloglog Link Function
 ```{r}
 
@@ -341,38 +365,6 @@ fit_cloglog <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + i
 
  AIC(fit_cloglog)
 ```
-
-```{r}
-summary(fit_probit)
-```
-```{r}
-
-#ROC curve on train data 
-prob=predict(fit_probit,type=c("response"))
-g <- roc(train_data$repay_fail ~ prob)
-AUC <- g$auc
-AUC
-Gini <- 2*(AUC - 1/2)
-Gini
-plot(g)
-
-
-```
-```{r}
-
-fit_probit_val <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
-    data = val_data, family = binomial("probit"))
-
-#ROC curve on validation data 
-prob=predict(fit_probit_val,type=c("response"))
-g <- roc(val_data$repay_fail ~ prob)
-AUC <- g$auc
-AUC
-Gini <- 2*(AUC - 1/2)
-Gini
-plot(g)
-```
-
 
 # Extended Credit Risk Model
 
