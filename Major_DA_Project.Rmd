@@ -428,7 +428,7 @@ fit_var_4 <- update(fit_var_1, control = glmerControl(optCtrl=list(maxfun=2e4)))
 ```
 
 ```{r extended_fit5}
-# fit_var_5 <- update(fit_var_4, control = glmerControl(optimizer = "Nelder_Mead", tolPwrss = )
+fit_var_5 <- update(fit_var_4, control = glmerControl(optimizer = "Nelder_Mead", tolPwrss = 1e-10))
 ```
 
 # Conclusion
