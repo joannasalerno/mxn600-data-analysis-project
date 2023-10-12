@@ -42,7 +42,6 @@ library(lmerTest)
 library(DHARMa)
 library(pROC)
 library(dplyr)
-library(broom.mixed)
 ```
 
 Next, we will load in our datasets. We have a total of 4:
