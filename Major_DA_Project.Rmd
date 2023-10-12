@@ -546,3 +546,15 @@ summary(fit_var_4)
 
 * Might want to explore other variables and interactions?
 
+# References
+
+Listed below are the references we consulted to conduct this analysis.
+
+[Control of Mixed Model Fitting](https://search.r-project.org/CRAN/refmans/lme4/html/lmerControl.html)
+
+[Five Cs of Credit](https://www.investopedia.com/ask/answers/040115/what-most-important-c-five-cs-credit.asp)
+
+[lme4 Convergence Warnings: Troubleshooting](https://rstudio-pubs-static.s3.amazonaws.com/33653_57fc7b8e5d484c909b615d8633c01d51.html)
+
+[lme4 Performance Tips](https://cran.r-project.org/web/packages/lme4/vignettes/lmerperf.html#:~:text=choice%20of%20optimizer,may%20be%20worth%20a%20try.)
+
