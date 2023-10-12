@@ -252,7 +252,7 @@ annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership
 
 Now, we'll standardize our numeric variables so that they can be accurately compared:
 
-```{r standardisation}
+```{r train_standardisation}
 numeric_columns <- sapply(train_data, is.numeric)  # Identify numeric columns
 
 # Scale the numeric columns while keeping column names
@@ -262,7 +262,7 @@ train_scaled_data <- train_data %>%
   mutate_if(is.numeric, scale)
 ```
 
-```{r standardisation}
+```{r val_standardisation}
 numeric_columns <- sapply(val_data, is.numeric)  # Identify numeric columns
 
 # Scale the numeric columns while keeping column names
@@ -272,9 +272,11 @@ val_scaled_data <- val_data %>%
   mutate_if(is.numeric, scale)
 ```
 
+## Logit Link Function
+
 Fit first logit model:
 
-```{r}
+```{r fit_logit}
 fit_logit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + 
                    inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
                  data = train_scaled_data, family = binomial) #18156.43 
@@ -282,23 +284,22 @@ fit_logit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
  AIC(fit_logit)
 ```
 
-```{r summary model fit}
+```{r summary_fit_logit}
 summary(fit_logit)
 ```
 
 int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate
 
-```{r,include=TRUE}
-#Simulate residuals from the model:
+```{r fit_logit_resid}
+# simulate residuals from the model:
 res = simulateResiduals(fit_logit)
 
-#Plot observed quantile versus expected quantile to assess distribution fit, and predicted value versus standardised residuals for unmodelled pattern in the residuals.
+# plot observed quantile versus expected quantile to assess distribution fit, and predicted value versus standardised residuals for unmodelled pattern in the residuals
 plot(res)
 ```
 
-```{r}
-
-#ROC curve on train data 
+```{r train_roc}
+# ROC curve on scaled train data 
 prob=predict(fit_logit,type=c("response"))
 g <- roc(train_scaled_data$repay_fail ~ prob)
 AUC <- g$auc
@@ -308,8 +309,8 @@ Gini
 plot(g)
 ```
 
-```{r}
-#ROC curve on scaled validation data
+```{r val_roc}
+# ROC curve on scaled validation data
 prob=predict(fit_logit,newdata=val_scaled_data,type=c("response"))
 g <- roc(val_scaled_data$repay_fail ~ prob)
 AUC <- g$auc
@@ -317,27 +318,19 @@ AUC
 Gini <- 2*(AUC - 1/2)
 Gini
 plot(g)
-
-
 ```
 
 ## Probit Link Function
-```{r}
 
+```{r fit_probit}
 fit_probit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
     data = train_scaled_data, family = binomial("probit"))
 
- AIC(fit_probit)
+AIC(fit_probit)
 ```
 
-
-```{r}
-#summary(fit_probit)
-```
-
-```{r}
-
-#ROC curve on train data 
+```{r probit_train_roc}
+# Probit model: ROC curve on scaled train data 
 prob=predict(fit_probit,type=c("response"))
 g <- roc(train_scaled_data$repay_fail ~ prob)
 AUC <- g$auc
@@ -345,10 +338,10 @@ AUC
 Gini <- 2*(AUC - 1/2)
 Gini
 plot(g)
-
 ```
-```{r}
-#ROC curve on validation data 
+
+```{r probit_val_roc}
+# Probit model: ROC curve on scaled validation data 
 prob=predict(fit_probit,newdata = val_scaled_data,type=c("response"))
 g <- roc(val_scaled_data$repay_fail ~ prob)
 AUC <- g$auc
@@ -357,18 +350,19 @@ Gini <- 2*(AUC - 1/2)
 Gini
 plot(g)
 ```
-## Cloglog Link Function
-```{r}
 
+## Cloglog Link Function
+
+```{r fit_cloglog}
 fit_cloglog <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
     data = train_scaled_data, family = binomial("cloglog")) #18156.43
 
- AIC(fit_cloglog)
+AIC(fit_cloglog)
 ```
 
-# Calculate Odds Ratio and CI for the Final model of GLM
-```{r odds ratio GLM}
+## Calculate odds ratio and CI for the final model of GLM
 
+```{r odds_ratio_GLM}
 summary_logit <- summary(fit_logit)
 
 parameter_estimates <- summary_logit$coef[, "Estimate"]
@@ -388,12 +382,12 @@ model_results <- data.frame(
   UpperCI = upper_ci
 )
 
-
 model_results
 ```
-# Odds Ratio Plot for the Final model of GLM
-```{r odds ratio plot GLM}
 
+## Odds ratio plot for the final model of GLM
+
+```{r odds_ratio_plot_GLM}
 plot_data <- data.frame(
   Variable = rownames(model_results),
   OddsRatio = model_results$OddsRatio,
@@ -408,35 +402,32 @@ ggplot(plot_data, aes(x = OddsRatio, xmin = LowerCI, xmax = UpperCI, y = Variabl
   theme_minimal() +
   labs(x = "Odds Ratio", y = "Variable") +
   ggtitle("Plot of Odds Ratios with CI")
-
-
 ```
 
+## Calculate accuracy and confusion matrix for the final model of GLM
 
-#Calculate Accuracy and Confusion Matrix for the Final Model of GLM
-```{r Accuracy and Confusion Matrix GLM}
-fit_logit <- ifelse(prob > 0.5,"1","0")
-
-fit_logit<-as.factor(fit_logit)
+```{r accuracy_confmatrix_GLM}
+fit_logit <- ifelse(prob > 0.5, "1", "0")
+fit_logit <- as.factor(fit_logit)
 
 require(caret)
-cm<-confusionMatrix(data=fit_logit,
-  reference=val_scaled_data$repay_fail)
+cm <- confusionMatrix(data=fit_logit,
+                    reference=val_scaled_data$repay_fail)
 
-Accuracy<-round(cm$overall[1],2)
+Accuracy <- round(cm$overall[1],2)
 Accuracy
-
 cm
 ```
+
 # Extended Credit Risk Model
 
-*** INTRO (motivation)
+
 
 ```{r str_extended}
 str(extended)
 ```
 
-First, we'll need to once again convert the relevant variables to factors. This time, this will include the new variables of zip_code and adddr_state:
+First, we'll need to once again convert the relevant variables to factors. This time, this will include the new variables of zip_code and addr_state:
 
 ```{r convert_vars_to_factors_ext}
 extended$term <- as.factor(extended$term)
