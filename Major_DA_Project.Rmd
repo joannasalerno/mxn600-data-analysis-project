@@ -367,6 +367,7 @@ summary_logit <- summary(fit_logit)
 
 parameter_estimates <- summary_logit$coef[, "Estimate"]
 standard_errors <- summary_logit$coef[, "Std. Error"]
+p_values <- summary_logit$coef[, "Pr(>|z|)"]
 
 # Calculate the odds ratios by exponentiating the parameter estimate values
 odds_ratios <- exp(parameter_estimates)
@@ -379,11 +380,31 @@ model_results <- data.frame(
   Estimate = parameter_estimates,
   OddsRatio = odds_ratios,
   LowerCI = lower_ci,
-  UpperCI = upper_ci
+  UpperCI = upper_ci,
+  p_value = p_values
 )
 
-model_results
+knitr::kable(
+  model_results,
+  col.names = c("Exponentiated Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
+)
 ```
+
+### Interpretations
+
+Listed below are some interpretations of the significant covariates of our final model:
+
+* Intercept is significant
+* int_rate: Higher interest rates increase the chances of defaulting
+* employment_length == n/a: With an unknown employment length, higher chances of default
+* annual_inc: As income increases, chances of defaulting decrease (negative coefficient)
+* purposes: medical, moving, other, small business, vacation: All associated with higher chances of defaulting
+* inq_last_6mths: More inquiries associated with higher chances of default
+* pub_rec: More public records associated with higher chances of default
+* revol_bal: Higher credit revolving balances associated with higher chances of default
+* revol_util: Utilizing a larger amount of available credit associated with higher chances of default
+* term == 60 months: Having a longer repayment period (compared to 36 months) associated with higher chances of default
+* int_rate x term == 60 months: Interaction between interest rate and term of 60 months associated with a decreased risk of loan default
 
 ## Odds ratio plot for the final model of GLM
 
@@ -404,6 +425,8 @@ ggplot(plot_data, aes(x = OddsRatio, xmin = LowerCI, xmax = UpperCI, y = Variabl
   ggtitle("Plot of Odds Ratios with CI")
 ```
 
+*** SOME EXPLANATION
+
 ## Calculate accuracy and confusion matrix for the final model of GLM
 
 ```{r accuracy_confmatrix_GLM}
@@ -412,16 +435,16 @@ fit_logit <- as.factor(fit_logit)
 
 require(caret)
 cm <- confusionMatrix(data=fit_logit,
-                    reference=val_scaled_data$repay_fail)
-
-Accuracy <- round(cm$overall[1],2)
-Accuracy
+                    reference=val_scaled_data$repay_fail,
+                    positive="1")
 cm
 ```
 
+Included above is a confusion matrix, which depicts our model's true and false positive/negative rates. This can be used to better understand how well the model can predict new credit applications in terms of how accurately it classifies new applicants. The confusion matrix shows that out of 7,683 applicants, 6,504 of them will not default and have been accurately classified as so, and 21 of them will default and have been accurately classified as so. However, using our model, 1,138 applicants are falsely classified as defaulters when in fact, they would not have defaulted, and 20 applicants are falsely classified as not defaulting, when they are actually defaulters. 
+
 ## Part 1 Discussion
 
-*** DISCUSS FINDINGS
+*** DISCUSS OVERALL FINDINGS
 
 # Extended Credit Risk Model
 
@@ -508,11 +531,23 @@ fit_var_4 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
                    control = glmerControl(check.conv.grad = .makeCC("warning", tol = 9e-3, relTol = NULL)))
 ```
 
-Now we can view this final model summary:
+Now we can view this model summary:
 
 ```{r}
 summary(fit_var_4)
 ```
+
+As the tolerance level for the above model was a bit high, we are now going to try to tune the optimizer to see if this allows for a ower tolerance.
+
+```{r}
+fit_var_5 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
+                     inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
+                     (1|addr_state) + (1|earliest_cr_line) + (1|zip_code),
+                   data = extended_scaled, family = binomial,
+                   control = glmerControl(optimizer = "Nelder_Mead",
+                                          check.conv.grad = .makeCC("warning", tol = 5e-3, relTol = NULL)))
+```
+
 
 *** EXPLAIN
 
