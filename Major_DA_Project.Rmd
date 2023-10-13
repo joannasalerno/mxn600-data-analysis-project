@@ -174,6 +174,7 @@ ggarrange(p1, p2)
 ggarrange(p3, p4)
 ggarrange(p5)
 ```
+
 Explanations: 
 
 Plot1 is a histogram that displays the distribution of interest rates in the dataset. The bars in the histogram are filled based on whether the loan was repaid successfully or not, where fill colours represent the two categories 0 for no failure and 1 for failure of loan repayment. Based on the plot, a trend can be seen that as the interest rate increases so does the chances of loan repayment failures.
@@ -197,6 +198,7 @@ for (var in numeric_vars) {
   hist(train_data[[var]], main=var, xlab=var)
 }
 ```
+
 The above plot displays the distribution of all numeric variables in the dataset in the form of a histogram. 
 
 ```{r dist_plots_2}
@@ -237,20 +239,23 @@ corr_matrix <- cor(train_data[columns], method = "pearson")
 ggcorr(corr_matrix, type = "lower", hjust = 1, size = 3, color = "grey")
 ```
 
-*** ADD EXPLANATION
+The correlation matrix (heatmap) reveals several noteworthy patterns:
 
-# New Credit Risk Model
+Upon reviewing the correlation matrix, it becomes evident that certain features exhibit a high degree of correlation, such as "total_acc" and "open_acc." Additionally, "credit_age_yrs" and "total_acc," as well as "revol_util" and "int_rate," while not displaying correlations as strong as those between "total_acc" and "open_acc," still exhibit a notable level of correlation.
 
-The correlation matrix (Heatmap) shows that:
+Furthermore, following our examination of this matrix, we embarked on our analysis with the goal of identifying and refining the best model.
 
+*** FIX BELOW:
 * open_acc and total_acc are strongly positively correlated, so we will keep total_acc and remove open_acc
 * revol_util and int_rate are strongly positively correlated, so we will keep int_rate and revol_util will be removed
 
-Based on the [Five Cs of Credit](https://www.investopedia.com/ask/answers/040115/what-most-important-c-five-cs-credit.asp) information and considering Correlation between variales below are the predictors more important to assess the risk whether the creditor will default on a loan:
+# New Credit Risk Model
+
+Keeping our above exploratory analysis in mind, as well as reviewing the [Five Cs of Credit](https://www.investopedia.com/ask/answers/040115/what-most-important-c-five-cs-credit.asp) information, we have decided that the below variables are important predictors in assessing the risk of credit default:
 
 annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs
 
-Now, we'll standardize our numeric variables so that they can be accurately compared:
+Now, we'll move on to building our first model. We'll first need to standardize our numeric variables so that they can be accurately compared:
 
 ```{r train_standardisation}
 numeric_columns <- sapply(train_data, is.numeric)  # Identify numeric columns
@@ -537,15 +542,23 @@ Now we can view this model summary:
 summary(fit_var_4)
 ```
 
-As the tolerance level for the above model was a bit high, we are now going to try to tune the optimizer to see if this allows for a ower tolerance.
+As the tolerance level for the above model was a bit high, we are now going to try to tune the optimizer to see if this allows for a lower tolerance.
 
 ```{r}
 fit_var_5 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
                      inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
                      (1|addr_state) + (1|earliest_cr_line) + (1|zip_code),
                    data = extended_scaled, family = binomial,
-                   control = glmerControl(optimizer = "Nelder_Mead",
-                                          check.conv.grad = .makeCC("warning", tol = 5e-3, relTol = NULL)))
+                   control = glmerControl(optimizer = "Nelder_Mead", tolPwrss = 1e-3))
+```
+
+
+```{r}
+fit_var_6 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
+                     inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
+                     (1|addr_state) + (1|earliest_cr_line) + (1|zip_code),
+                   data = extended_scaled, family = binomial,
+                   control = glmerControl(optimizer = "Nelder_Mead", check.conv.grad = .makeCC("warning", tol = 8e-3, relTol = NULL)))
 ```
 
 
@@ -559,10 +572,15 @@ fit_var_5 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
 ```
 
 
-## Goodness-of-Fit
-
-
 ## Analyse Performance Benchmarks with Extended Model
+
+```{r gof_fit_var_4}
+# simulate residuals from the model:
+res = simulateResiduals(fit_var_4)
+
+# plot observed quantile versus expected quantile to assess distribution fit, and predicted value versus standardised residuals for unmodelled pattern in the residuals
+plot(res)
+```
 
 
 ## Part 2 Discussion
