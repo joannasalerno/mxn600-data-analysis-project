@@ -564,7 +564,7 @@ ggplot(plot_data, aes(x = OddsRatio, xmin = LowerCI, xmax = UpperCI, y = Variabl
   xlim(c(0, max(plot_data$UpperCI + 1))) +  
   theme_minimal() +
   labs(x = "Odds Ratio", y = "Variable") +
-  ggtitle("Odds Ratios of Rapyment Failure")
+  ggtitle("Odds Ratios of Rapyment Failure for GLM")
 ```
 Odds Ratio of Repayment Failure for GLM model including Confidence Interval ranges compared to baseline 36 months term, less than one year employment length, and loan purpose for car.
 
@@ -815,6 +815,25 @@ knitr::kable(
 )
 ```
 
+## Odds ratio plot for the final model of GLMM
+
+```{r odds_ratio_plot_GLM}
+plot_data <- data.frame(
+  Variable = rownames(model_results2),
+  OddsRatio = model_results2$OddsRatio,
+  LowerCI = model_results2$LowerCI,
+  UpperCI = model_results2$UpperCI
+)
+
+ggplot(plot_data, aes(x = OddsRatio, xmin = LowerCI, xmax = UpperCI, y = Variable)) +
+  geom_point(size = 3, color="red") +
+  geom_errorbarh(height = 0.2, color = "blue") +
+  xlim(c(0, max(plot_data$UpperCI + 1))) +  
+  theme_minimal() +
+  labs(x = "Odds Ratio", y = "Variable") +
+  ggtitle("Odds Ratios of Rapyment Failure for GLMM")
+```
+
 ### Interpretations
 
 ...
@@ -822,9 +841,20 @@ knitr::kable(
 Newly significant covariates, after controlling for location and time:
 
 * purpose == debt_consolidation
+
+For a one-unit increase in the purpose of debt_consolidation, the odds of "repay_fail" occurring increase by a factor of approximately 1.24% (95% CI: 1.04-1.48). This effect is statistically significant with a very low p-value, indicating that loan taken out for the purpose of debt consolidation is associated with a higher likelihood of loan repayment failure.
+
 * purpose == educational
+
+For a one-unit increase in the purpose educational, the odds of "repay_fail" occurring increase by a factor of approximately 2.03% (95% CI: 1.50-2.76). This effect is statistically significant with a very low p-value.
+
 * purpose == home_improvement
+
+For a one-unit increase in the purpose home_improvement, the odds of "repay_fail" occurring increase by a factor of approximately 1.23% (95% CI: 1.00-1.50).
+
 * purpose == renewable_energy
+
+For a one-unit increase in the purpose renewable_energy, the odds of "repay_fail" occurring increase by a factor of approximately 1.82% (95% CI: 1.00-3.28).
 
 ## Part 2 Discussion
 
