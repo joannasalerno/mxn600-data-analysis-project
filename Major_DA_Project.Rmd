@@ -702,6 +702,24 @@ fit_var_5 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
 ```{r}
 summary(fit_var_5)
 ```
+```{r extended_roc}
+par(mfrow = c(1, 2))
+# ROC curve on scaled extended data  for fit_var_4
+prob=predict(fit_var_4,type=c("response"))
+g <- roc(extended_scaled$repay_fail ~ prob)
+AUC <- g$auc
+Gini <- 2*(AUC - 1/2)
+Gini
+plot(g, main = "ROC Curve for fit_var_4")
+
+# ROC curve on scaled extended data  for fit_var_5
+prob=predict(fit_var_5,type=c("response"))
+g <- roc(extended_scaled$repay_fail ~ prob)
+AUC <- g$auc
+Gini <- 2*(AUC - 1/2)
+Gini
+plot(g, main = "ROC Curve for fit_var_5")
+```
 
 As the tolerance level for the above model was a bit high, we are now going to try to tune other paramaters to see if this allows for a lower tolerance.
 
