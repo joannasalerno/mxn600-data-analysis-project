@@ -399,6 +399,7 @@ res = simulateResiduals(fit_logit)
 # plot observed quantile versus expected quantile to assess distribution fit, and predicted value versus standardised residuals for unmodelled pattern in the residuals
 plot(res)
 ```
+DHARMA residual plots shows no sign of overdispersion: The distribution test (KS), Dispersion test and outlier test all are non-significant means there is evidence to suggest that the distribution of the simulated quantiles follows a uniform distribution. Additionally, the quantiles of the residuals (red lines) show a uniform pattern for predicted values (second plot).
 
 ```{r train_roc}
 # ROC curve on scaled train data 
@@ -421,6 +422,7 @@ Gini <- 2*(AUC - 1/2)
 Gini
 plot(g)
 ```
+The Gini score for the fitted logistic regression model is 0.410 on the training set and 0.395 on the validation set. Both of these scores are higher than those of the old model. Additionally, the ROC curve for the new model is positioned closer to the top-left corner compared to the old model. These findings collectively indicate that the new model is better than the old one.
 
 ## Probit Link Function
 
@@ -452,6 +454,7 @@ Gini <- 2*(AUC - 1/2)
 Gini
 plot(g)
 ```
+While fit_probit model has lower AIC than fit_logit, but has slightly lower Gini score on the validation set.
 
 ## Cloglog Link Function
 
@@ -461,6 +464,9 @@ fit_cloglog <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + i
 
 AIC(fit_cloglog)
 ```
+fit_cloglog has highr AIC compare to both ligit_fit and probit_fit models.
+
+Based on comparison conducted between three different link functions for our glm model, we decided to keep fit_logit as our final since it showed better performance.
 
 ## Calculate odds ratio and CI for the final model of GLM
 
