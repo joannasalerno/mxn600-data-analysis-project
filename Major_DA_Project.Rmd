@@ -402,8 +402,8 @@ plot(res)
 
 ```{r train_roc}
 # ROC curve on scaled train data 
-prob=predict(fit_logit,newdata=test_scaled_data,type=c("response"))
-g <- roc(test_scaled_data$repay_fail ~ prob)
+prob=predict(fit_logit,type=c("response"))
+g <- roc(train_scaled_data$repay_fail ~ prob)
 AUC <- g$auc
 AUC
 Gini <- 2*(AUC - 1/2)
@@ -489,6 +489,18 @@ model_results <- data.frame(
 
 knitr::kable(
   model_results,
+  col.names = c("Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
+)
+```
+
+Displaying only those variables whose p-value is less than 0.05:
+```{r}
+# Filter rows where p-value is less than 0.05
+significant_results <- model_results[model_results$p_value < 0.05, ]
+
+# Print the significant results
+knitr::kable(
+  significant_results,
   col.names = c("Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
 )
 ```
