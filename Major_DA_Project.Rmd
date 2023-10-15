@@ -849,19 +849,19 @@ Newly significant covariates, after controlling for location and time:
 
 * purpose == debt_consolidation
 
-For a one-unit increase in the purpose of debt_consolidation, the odds of "repay_fail" occurring increase by a factor of approximately 1.24% (95% CI: 0.99-1.55). This effect is statistically significant with a very low p-value, indicating that loan taken out for the purpose of debt consolidation is associated with a higher likelihood of loan repayment failure.
+For a one-unit increase in the purpose of debt_consolidation, the odds of "repay_fail" occurring increase by a factor of approximately 1.24% (95% CI: 1.04-1.48). This effect is statistically significant with a very low p-value, indicating that loan taken out for the purpose of debt consolidation is associated with a higher likelihood of loan repayment failure.
 
 * purpose == educational
 
-For a one-unit increase in the purpose educational, the odds of "repay_fail" occurring increase by a factor of approximately 1.29% (95% CI: 1.29-0.83). This effect is statistically significant with a very low p-value.
+For a one-unit increase in the purpose educational, the odds of "repay_fail" occurring increase by a factor of approximately 2.03% (95% CI: 1.50-2.76). This effect is statistically significant with a very low p-value.
 
 * purpose == home_improvement
 
-For a one-unit increase in the purpose home_improvement, the odds of "repay_fail" occurring increase by a factor of approximately 1.19% (95% CI: 0.92-1.54).
+For a one-unit increase in the purpose home_improvement, the odds of "repay_fail" occurring increase by a factor of approximately 1.23% (95% CI: 1.00-1.50).
 
 * purpose == renewable_energy
 
-For a one-unit increase in the purpose renewable_energy, the odds of "repay_fail" occurring increase by a factor of approximately 1.48% (95% CI: 0.66-3.29).
+For a one-unit increase in the purpose renewable_energy, the odds of "repay_fail" occurring increase by a factor of approximately 1.82% (95% CI: 1.00-3.28).
 
 ## Part 2 Discussion
 
