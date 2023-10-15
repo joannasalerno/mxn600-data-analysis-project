@@ -275,7 +275,86 @@ val_scaled_data <- val_data %>%
 
 ## Logit Link Function
 
-Fit first logit model:
+First we decided to perform stepAIC to get important covariates from the dataset.
+
+```{r}
+#Full model for backwards selection:
+full_model <- glm(repay_fail ~ loan_amnt + term + int_rate + emp_length + home_ownership + annual_inc + verification_status + purpose + dti + delinq_2yrs + inq_last_6mths + open_acc + pub_rec + revol_bal + revol_util + total_acc + credit_age_yrs, 
+                 data = train_scaled_data, family = "binomial")
+
+#Model with no variables present for forwards selection:
+null_model <- glm(data = train_scaled_data,
+    formula = repay_fail ~ 1,
+    family = "binomial")
+
+#Perform backward and forward selection:
+backward_sel_model <- stepAIC(
+  full_model, direction = "backward",trace = 0)
+forward_sel_model <- stepAIC(
+  null_model,
+  scope = formula(full_model),
+  direction = "forward",
+  trace = 0) ## trace = 0 prevents automatic output of stepAIC function.
+```
+
+```{r}
+formula(backward_sel_model)
+```
+
+create a model using the formula suggested by stepAIC:
+
+```{r}
+model1 <- glm(repay_fail ~ term + int_rate + emp_length + annual_inc + purpose + 
+    inq_last_6mths + pub_rec + revol_bal + revol_util, data = train_scaled_data, family = binomial)
+```
+
+```{r}
+AIC(model1)
+```
+Now creating a model a few interactions based on most relevance:
+
+```{r}
+model2 <- glm(repay_fail ~ term + int_rate + emp_length + annual_inc + purpose + 
+    inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate + term * emp_length + term * annual_inc + term * purpose + term * pub_rec + int_rate * emp_length + int_rate * pub_rec + int_rate * annual_inc, data = train_scaled_data, family = binomial)
+```
+
+```{r}
+AIC(model2)
+```
+
+The AIC of the new model is higher. We will now do an Anova test to confirm whether the addition of these interactions are adding value to the model compared to model without interactions:
+
+```{r}
+anova(model1, model2, test = "Chisq")
+```
+
+Based on the anova test, Model 2 is significantly better at explaining the variation in the dependent variable repay_fail compared to Model 1.
+
+```{r}
+model3 <- glm(repay_fail ~ term + int_rate + emp_length + annual_inc + purpose +
+   inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate + term * emp_length + term * annual_inc + term * purpose + term * pub_rec,
+     data = train_scaled_data, family = binomial)
+```
+
+```{r}
+AIC(model3)
+```
+
+Model3 has the lowest AIC so far as compared to all other models we built.
+
+```{r}
+anova(model1, model3, test = "Chisq")
+```
+
+Based on the anova test, Model 3 is significantly better at explaining the variation in the dependent variable repay_fail compared to Model 1.
+
+```{r}
+summary(model3)
+```
+
+Now we select only the significant covariates from the above model to try and build a model with even lower AIC.
+
+Fit logit model:
 
 ```{r fit_logit}
 fit_logit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + 
@@ -284,12 +363,12 @@ fit_logit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
 
  AIC(fit_logit)
 ```
+This model gives the lowest AIC, hence we chose to proceed with this model.
 
 ```{r summary_fit_logit}
 summary(fit_logit)
 ```
 
-int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate
 
 ```{r fit_logit_resid}
 # simulate residuals from the model:
@@ -394,19 +473,40 @@ knitr::kable(
 
 ### Interpretations
 
-Listed below are some interpretations of the significant covariates of our final model:
+Listed below are interpretations of the covariates of our final model:
 
-* Intercept is significant
-* int_rate: Higher interest rates increase the chances of defaulting
-* employment_length == n/a: With an unknown employment length, higher chances of default
-* annual_inc: As income increases, chances of defaulting decrease (negative coefficient)
-* purposes: medical, moving, other, small business, vacation: All associated with higher chances of defaulting
-* inq_last_6mths: More inquiries associated with higher chances of default
-* pub_rec: More public records associated with higher chances of default
-* revol_bal: Higher credit revolving balances associated with higher chances of default
-* revol_util: Utilizing a larger amount of available credit associated with higher chances of default
-* term == 60 months: Having a longer repayment period (compared to 36 months) associated with higher chances of default
-* int_rate x term == 60 months: Interaction between interest rate and term of 60 months associated with a decreased risk of loan default
+- The intercept is statistically significant for individuals who have been employed for less than one year, are seeking a car loan, and have a 36-month loan term when all other predictors are equal to zero.
+
+- For a one-unit increase in the interest rate, the odds of "repay_fail" occurring increase by a factor of approximately 1.57. This is a significant effect with a very low p-value.
+
+- For individuals with 1 to 10 plus years of employment, none of these employment lengths have a significant effect on the odds of "repay_fail" occurring compared to the reference category (less than one year"). Their odds ratios are close to 1, and their p-values are above 0.05, indicating that these employment lengths do not significantly impact the likelihood of loan repayment failure.
+
+For individuals with missing or not specified employment length, or unemployed individual ("n/a"), For a one-unit increase in the emp_lengthn/a, the odds of "repay_fail" occurring increase by a factor of approximately 1.73. This effect is statistically significant with a very low p-value, indicating that the absence of employment length information or for unemployed individual is associated with a higher likelihood of loan repayment failure.
+
+- For a one-unit increase in annual income, the odds of "repay_fail" occurring decrease by a factor of approximately 0.71. This is a significant effect with a very low p-value.
+
+- For loans with the purpose of credit_card, debt_consolidation, educational, home_improvement, house, major_purchase, renewable_energy and wedding there is no significant effect on the odds of "repay_fail" occurring compared to the reference category (car). The p-value is above 0.05, indicating that these loan purposes do not significantly impact the likelihood of loan repayment failure.
+
+For a one-unit increase in medical purpose, the odds of "repay_fail" occurring increase by a factor of approximately 1.83.
+For a one-unit increase in moving purpose, the odds of "repay_fail" occurring increase by a factor of approximately 1.65.
+For a one-unit increase in other purpose, the odds of "repay_fail" occurring increase by a factor of approximately 1.58.
+For a one-unit increase in small business purpose, the odds of "repay_fail" occurring increase by a factor of approximately 2.78.  This effect is statistically significant with a very low p-value, indicating that the small business loan purpose is associated with a higher likelihood of loan repayment failure.
+For a one-unit increase in vacation purpose, the odds of "repay_fail" occurring increase by a factor of approximately 1.56. 
+
+The specific loan purposes "medical," "moving," "other," and "small_business" are associated with a higher likelihood of loan repayment failure, and these effects are statistically significant. The effect of small business loan purpose is the most significant. "vacation" loans also have a statistically significant effect but to a lesser degree.
+ 
+- For a one-unit increase in the number of inquiries in past 6 months, the odds of "repay_fail" occurring increase by a factor of approximately 1.24. This is a significant effect with a very low p-value.
+
+- For a one-unit increase in the number of derogatory public records, the odds of "repay_fail" occurring increase by a factor of approximately 1.06. 
+
+- For a one-unit increase in revolving balance, the odds of "repay_fail" occurring increase by a factor of approximately 1.10.
+
+- For a one-unit increase in revolving utilization, the odds of "repay_fail" occurring increase by a factor of approximately 1.12.
+
+- Having a 60-month loan term increases the odds of "repay_fail" occurring by a factor of approximately 1.67 compared to the reference category (36 months loan term).
+
+- The interaction term between interest rate and the 60-month term is negative. Its negative coefficient suggests that the effect of interest rate on "repay_fail" is less severe for loans with a 60-month term compared to the reference category 36 months terms. In other words, while interest rate still matters for loan repayment, its impact is less pronounced for loans with longer terms.
+For a one-unit increase in interest rate, the odds of loan repayment failure decrease by a factor of approximately 0.9 when the loan term is 60 months. the relationship between interest rate and loan repayment may differ depending on the term length, with the effect being less pronounced for longer-term loans.
 
 ## Odds ratio plot for the final model of GLM
 
