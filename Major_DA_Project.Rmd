@@ -764,6 +764,18 @@ res = simulateResiduals(fit_var_5)
 plot(res)
 ```
 
+Does the model fit the data well?
+```{r Goodness-of-fit}
+plot(residuals(fit_var_5))
+```
+Look at the distribution of the random effects:
+```{r res,include=TRUE}
+res <- ranef(fit_var_5)
+hist(res$earliest_cr_line[,1])
+
+hist(res$location[,1])
+```
+
 ## Calculate odds ratio and CI for the final GLMM model
 
 Now, we will ...
