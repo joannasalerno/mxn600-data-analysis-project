@@ -570,15 +570,13 @@ extended$repay_fail <- as.factor(extended$repay_fail)
 extended$zip_code <- as.factor(extended$zip_code)
 extended$addr_state <- as.factor(extended$addr_state)
 extended$earliest_cr_line <- as.factor(extended$earliest_cr_line)
-extended <- within(extended, location <- factor(as.factor(addr_state):zip_code))
+extended <- within(extended, location <- factor(as.factor(addr_state):zip_code)) # nest zip codes within states
 ```
 
 ```{r number of levels for each random effect}
 nlevels(extended$zip_code)
-
 nlevels(extended$addr_state)
-
-nlevels(extended$location) # added location, which is in the form of state:zip
+nlevels(extended$location) # location includes zip nested within each state
 
 nlevels(extended$earliest_cr_line)
 ```
@@ -709,6 +707,51 @@ res = simulateResiduals(fit_var_5)
 plot(res)
 ```
 
+## Calculate odds ratio and CI for the final GLMM model
+
+Now, we will ...
+
+```{r odds_ratio_GLMM}
+summary_fit5 <- summary(fit_var_5)
+
+parameter_estimates <- summary_fit5$coef[, "Estimate"]
+standard_errors <- summary_fit5$coef[, "Std. Error"]
+p_values <- summary_fit5$coef[, "Pr(>|z|)"]
+
+# Calculate the odds ratios by exponentiating the parameter estimate values
+odds_ratios <- exp(parameter_estimates)
+
+# Calculate the confidence intervals for the odds ratios
+lower_ci <- exp(parameter_estimates - 1.96 * standard_errors)  # 1.96 corresponds to a 95% confidence interval
+upper_ci <- exp(parameter_estimates + 1.96 * standard_errors)
+
+model_results <- data.frame(
+  Estimate = parameter_estimates,
+  OddsRatio = odds_ratios,
+  LowerCI = lower_ci,
+  UpperCI = upper_ci,
+  p_value = p_values
+)
+#model_results
+
+knitr::kable(
+  model_results,
+  col.names = c("Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
+)
+```
+
+
+### Interpretations
+
+...
+
+Newly significant covariates, after controlling for location and time:
+
+* purpose == debt_consolidation
+* purpose == educational
+* purpose == home_improvement
+* purpose == renewable_energy
+
 ## Part 2 Discussion
 
 ...
@@ -717,14 +760,16 @@ plot(res)
 
 ...
 
-## Limitations
+## Caveats
 
+* Extended model has a relatively high tolerance value, which could potentially be further reduced by tuning other model parameters
 * We have only included a subset of the possible variables which may help to predict loan default
 * We do not know the time frame of the data that is included, and it might be helpful to know this to ensure that we use recent data for model building and prediction tasks
 
 ## Future Directions
 
-* We might want to explore other variables and interactions between variables that may help to predict loan default
+* You might want to explore other variables and interactions between variables that may help to predict loan default
+* If provided with a validation dataset which included the extended variables of location and time, you could choose to use the extended model to predict loan default, and compare the extended model's prediction performance with that of the new model from part 1 of this analysis
 
 # References
 
