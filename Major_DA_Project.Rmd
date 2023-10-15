@@ -274,7 +274,86 @@ val_scaled_data <- val_data %>%
 
 ## Logit Link Function
 
-Fit first logit model:
+First we decided to perform stepAIC to get important covariates from the dataset.
+
+```{r}
+#Full model for backwards selection:
+full_model <- glm(repay_fail ~ loan_amnt + term + int_rate + emp_length + home_ownership + annual_inc + verification_status + purpose + dti + delinq_2yrs + inq_last_6mths + open_acc + pub_rec + revol_bal + revol_util + total_acc + credit_age_yrs, 
+                 data = train_scaled_data, family = "binomial")
+
+#Model with no variables present for forwards selection:
+null_model <- glm(data = train_scaled_data,
+    formula = repay_fail ~ 1,
+    family = "binomial")
+
+#Perform backward and forward selection:
+backward_sel_model <- stepAIC(
+  full_model, direction = "backward",trace = 0)
+forward_sel_model <- stepAIC(
+  null_model,
+  scope = formula(full_model),
+  direction = "forward",
+  trace = 0) ## trace = 0 prevents automatic output of stepAIC function.
+```
+
+```{r}
+formula(backward_sel_model)
+```
+
+create a model using the formula suggested by stepAIC:
+
+```{r}
+model1 <- glm(repay_fail ~ term + int_rate + emp_length + annual_inc + purpose + 
+    inq_last_6mths + pub_rec + revol_bal + revol_util, data = train_scaled_data, family = binomial)
+```
+
+```{r}
+AIC(model1)
+```
+Now creating a model a few interactions based on most relevance:
+
+```{r}
+model2 <- glm(repay_fail ~ term + int_rate + emp_length + annual_inc + purpose + 
+    inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate + term * emp_length + term * annual_inc + term * purpose + term * pub_rec + int_rate * emp_length + int_rate * pub_rec + int_rate * annual_inc, data = train_scaled_data, family = binomial)
+```
+
+```{r}
+AIC(model2)
+```
+
+The AIC of the new model is higher. We will now do an Anova test to confirm whether the addition of these interactions are adding value to the model compared to model without interactions:
+
+```{r}
+anova(model1, model2, test = "Chisq")
+```
+
+Based on the anova test, Model 2 is significantly better at explaining the variation in the dependent variable repay_fail compared to Model 1.
+
+```{r}
+model3 <- glm(repay_fail ~ term + int_rate + emp_length + annual_inc + purpose +
+   inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate + term * emp_length + term * annual_inc + term * purpose + term * pub_rec,
+     data = train_scaled_data, family = binomial)
+```
+
+```{r}
+AIC(model3)
+```
+
+Model3 has the lowest AIC so far as compared to all other models we built.
+
+```{r}
+anova(model1, model3, test = "Chisq")
+```
+
+Based on the anova test, Model 3 is significantly better at explaining the variation in the dependent variable repay_fail compared to Model 1.
+
+```{r}
+summary(model3)
+```
+
+Now we select only the significant covariates from the above model to try and build a model with even lower AIC.
+
+Fit logit model:
 
 ```{r fit_logit}
 fit_logit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + 
@@ -283,12 +362,12 @@ fit_logit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
 
  AIC(fit_logit)
 ```
+This model gives the lowest AIC, hence we chose to proceed with this model.
 
 ```{r summary_fit_logit}
 summary(fit_logit)
 ```
 
-int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate
 
 ```{r fit_logit_resid}
 # simulate residuals from the model:
