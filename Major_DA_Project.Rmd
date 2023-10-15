@@ -485,8 +485,8 @@ model_results <- data.frame(
   UpperCI = upper_ci,
   p_value = p_values
 )
-#model_results
 
+# Display results in a table
 knitr::kable(
   model_results,
   col.names = c("Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
@@ -747,39 +747,44 @@ Now, we will ...
 ```{r odds_ratio_GLMM}
 summary_fit5 <- summary(fit_var_5)
 
-parameter_estimates <- summary_fit5$coef[, "Estimate"]
-standard_errors <- summary_fit5$coef[, "Std. Error"]
-p_values <- summary_fit5$coef[, "Pr(>|z|)"]
+parameter_estimates2 <- summary_fit5$coef[, "Estimate"]
+standard_errors2 <- summary_fit5$coef[, "Std. Error"]
+p_values2 <- summary_fit5$coef[, "Pr(>|z|)"]
 
 # Calculate the odds ratios by exponentiating the parameter estimate values
-odds_ratios <- exp(parameter_estimates)
+odds_ratios2 <- exp(parameter_estimates)
 
 # Calculate the confidence intervals for the odds ratios
-lower_ci <- exp(parameter_estimates - 1.96 * standard_errors)  # 1.96 corresponds to a 95% confidence interval
-upper_ci <- exp(parameter_estimates + 1.96 * standard_errors)
+lower_ci2 <- exp(parameter_estimates - 1.96 * standard_errors)  # 1.96 corresponds to a 95% confidence interval
+upper_ci2 <- exp(parameter_estimates + 1.96 * standard_errors)
 
-model_results <- data.frame(
-  Estimate = parameter_estimates,
-  OddsRatio = odds_ratios,
-  LowerCI = lower_ci,
-  UpperCI = upper_ci,
-  p_value = p_values
-)
-#model_results
-
-# all results
-knitr::kable(
-  model_results,
-  col.names = c("Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
+model_results2 <- data.frame(
+  Estimate = parameter_estimates2,
+  OddsRatio = odds_ratios2,
+  LowerCI = lower_ci2,
+  UpperCI = upper_ci2,
+  p_value = p_values2
 )
 
-# just significant results
+# Display results in a table
 knitr::kable(
-  model_results %>% filter(p_value < 0.05),
+  model_results2,
   col.names = c("Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
 )
 ```
 
+Displaying only those variables whose p-value is less than 0.05:
+
+```{r}
+# Filter rows where p-value is less than 0.05
+significant_results2 <- model_results2[model_results2$p_value < 0.05, ]
+
+# Print the significant results
+knitr::kable(
+  significant_results2,
+  col.names = c("Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
+)
+```
 
 ### Interpretations
 
