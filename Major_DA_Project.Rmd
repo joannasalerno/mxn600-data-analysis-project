@@ -822,6 +822,25 @@ knitr::kable(
 )
 ```
 
+## Odds ratio plot for the final model of GLMM
+
+```{r odds_ratio_plot_GLM}
+plot_data <- data.frame(
+  Variable = rownames(model_results2),
+  OddsRatio = model_results2$OddsRatio,
+  LowerCI = model_results2$LowerCI,
+  UpperCI = model_results2$UpperCI
+)
+
+ggplot(plot_data, aes(x = OddsRatio, xmin = LowerCI, xmax = UpperCI, y = Variable)) +
+  geom_point(size = 3, color="red") +
+  geom_errorbarh(height = 0.2, color = "blue") +
+  xlim(c(0, max(plot_data$UpperCI + 1))) +  
+  theme_minimal() +
+  labs(x = "Odds Ratio", y = "Variable") +
+  ggtitle("Odds Ratios of Rapyment Failure for GLMM")
+```
+
 ### Interpretations
 
 ...
