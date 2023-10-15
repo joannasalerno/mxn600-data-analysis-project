@@ -733,8 +733,15 @@ model_results <- data.frame(
 )
 #model_results
 
+# all results
 knitr::kable(
   model_results,
+  col.names = c("Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
+)
+
+# just significant results
+knitr::kable(
+  model_results %>% filter(p_value < 0.05),
   col.names = c("Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
 )
 ```
