@@ -383,10 +383,11 @@ model_results <- data.frame(
   UpperCI = upper_ci,
   p_value = p_values
 )
+#model_results
 
 knitr::kable(
   model_results,
-  col.names = c("Exponentiated Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
+  col.names = c("Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
 )
 ```
 
