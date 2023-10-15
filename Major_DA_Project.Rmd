@@ -242,13 +242,14 @@ ggcorr(corr_matrix, hjust = 1, size = 3, color = "grey")
 The correlation matrix (heatmap) reveals several noteworthy patterns:
 
 Upon reviewing the correlation matrix, it becomes evident that certain features exhibit a high degree of positive correlation, such as "total_acc" and "open_acc." Additionally, "credit_age_yrs" and "total_acc," as well as "revol_util" and "int_rate," while not displaying correlations as strong as those between "total_acc" and "open_acc," still exhibit a notable level of correlation.
-Furthermore, following our examination of this matrix, Each variable within pairs of highly correlated predictors will be analyzed while fitting models with the goal of identifying and refining the best model.
+
+Furthermore, following our examination of this matrix, each variable within pairs of highly correlated predictors will be analyzed while fitting models with the goal of identifying and refining the best model.
 
 # New Credit Risk Model
 
 Keeping our above exploratory analysis in mind, as well as reviewing the [Five Cs of Credit](https://www.investopedia.com/ask/answers/040115/what-most-important-c-five-cs-credit.asp) information, we have decided that the below variables are important predictors in assessing the risk of credit default:
 
-annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, revol_util, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs, pub_rec, 
+annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, revol_util, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs, pub_rec
                    
 Now, we'll move on to building our first model. We'll first need to standardize our numeric variables so that they can be accurately compared:
 
@@ -469,6 +470,7 @@ extended$repay_fail <- as.factor(extended$repay_fail)
 extended$zip_code <- as.factor(extended$zip_code)
 extended$addr_state <- as.factor(extended$addr_state)
 extended$earliest_cr_line <- as.factor(extended$earliest_cr_line)
+extended <- within(extended, location <- factor(as.factor(addr_state):zip_code))
 ```
 
 ```{r number of levels for each random effect}
@@ -476,8 +478,9 @@ nlevels(extended$zip_code)
 
 nlevels(extended$addr_state)
 
-nlevels(extended$earliest_cr_line)
+nlevels(extended$location) # added location, which is in the form of state:zip
 
+nlevels(extended$earliest_cr_line)
 ```
 
 Once again, we need to standardise the numeric variables in the dataset:
@@ -527,6 +530,7 @@ fit_var_3 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
 
 The model ran successfully, so we'll take a look at the summary:
 AIC is 30126.5, and is lower than fit_var_1 which indicates the new model with both added random effects addr_state and earliest_cr_line is a better fit.
+
 ```{r}
 summary(fit_var_3)
 ```
@@ -547,23 +551,29 @@ Now we can view this model summary:
 summary(fit_var_4)
 ```
 
-As the tolerance level for the above model was a bit high, we are now going to try to tune the optimizer to see if this allows for a lower tolerance.
+Now, we'll try including just two random effects: earliest credit line (time), and then new location factor we created earlier, which combines states and zip codes in the form of state:zip.
 
 ```{r}
 fit_var_5 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
                      inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
-                     (1|addr_state) + (1|earliest_cr_line) + (1|zip_code),
+                     (1|location) + (1|earliest_cr_line),
                    data = extended_scaled, family = binomial,
-                   control = glmerControl(optimizer = "Nelder_Mead", tolPwrss = 1e-3))
+                   control = glmerControl(optimizer = "Nelder_Mead",
+                                          check.conv.grad = .makeCC("warning", tol = 8e-3, relTol = NULL)))
 ```
 
+```{r}
+summary(fit_var_5)
+```
+
+As the tolerance level for the above model was a bit high, we are now going to try to tune other paramaters to see if this allows for a lower tolerance.
 
 ```{r}
 fit_var_6 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
                      inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
                      (1|addr_state) + (1|earliest_cr_line) + (1|zip_code),
                    data = extended_scaled, family = binomial,
-                   control = glmerControl(optimizer = "Nelder_Mead", check.conv.grad = .makeCC("warning", tol = 8e-3, relTol = NULL)))
+                   control = glmerControl(optimizer = "Nelder_Mead", tolPwrss = 1e-3))
 ```
 
 
@@ -579,6 +589,8 @@ fit_var_6 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
 
 ## Analyse Performance Benchmarks with Extended Model
 
+Analyse model with larger tolerance (all random effects separate):
+
 ```{r gof_fit_var_4}
 # simulate residuals from the model:
 res = simulateResiduals(fit_var_4)
@@ -587,6 +599,15 @@ res = simulateResiduals(fit_var_4)
 plot(res)
 ```
 
+Analyse model with random effects of (1) time and (2) zip code nested within state:
+
+```{r gof_fit_var_5}
+# simulate residuals from the model:
+res = simulateResiduals(fit_var_5)
+
+# plot observed quantile versus expected quantile to assess distribution fit, and predicted value versus standardised residuals for unmodelled pattern in the residuals
+plot(res)
+```
 
 ## Part 2 Discussion
 
@@ -598,11 +619,12 @@ plot(res)
 
 ## Limitations
 
-* Time frame of data model was built on?
+* We have only included a subset of the possible variables which may help to predict loan default
+* We do not know the time frame of the data that is included, and it might be helpful to know this to ensure that we use recent data for model building and prediction tasks
 
 ## Future Directions
 
-* Might want to explore other variables and interactions?
+* We might want to explore other variables and interactions between variables that may help to predict loan default
 
 # References
 
