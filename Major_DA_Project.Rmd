@@ -531,7 +531,7 @@ For a one-unit increase in medical purpose, the odds of "repay_fail" occurring i
 For a one-unit increase in moving purpose, the odds of "repay_fail" occurring increase by a factor of approximately 1.65 (95% CI: 1.15-2.36).
 For a one-unit increase in other purpose, the odds of "repay_fail" occurring increase by a factor of approximately 1.58 (95% CI: 1.24-2.00).
 For a one-unit increase in small business purpose, the odds of "repay_fail" occurring increase by a factor of approximately 2.78 (95% CI: 2.15-3.59).  This effect is statistically significant with a very low p-value, indicating that the small business loan purpose is associated with a higher likelihood of loan repayment failure.
-For a one-unit increase in vacation purpose, the odds of "repay_fail" occurring increase by a factor of approximately 1.56 (95% CI: 101-2.43). 
+For a one-unit increase in vacation purpose, the odds of "repay_fail" occurring increase by a factor of approximately 1.56 (95% CI: 1.01-2.43). 
 
 The specific loan purposes "medical," "moving," "other," and "small_business" are associated with a higher likelihood of loan repayment failure, and these effects are statistically significant. The effect of small business loan purpose is the most significant. "vacation" loans also have a statistically significant effect but to a lesser degree.
  
