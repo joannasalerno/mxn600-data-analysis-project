@@ -76,6 +76,7 @@ At first glance of the first 6 rows of this dataset, we notice there is a value 
 dim(train_data)
 ```
 
+
 The training dataset contains a total of 23,052 observations of 19 variables.
 
 ```{r data_structure}
@@ -132,6 +133,16 @@ train_data$verification_status <- as.factor(train_data$verification_status)
 train_data$purpose <- as.factor(train_data$purpose)
 train_data$repay_fail <- as.factor(train_data$repay_fail)
 ```
+
+```{r}
+test_data$term <- as.factor(test_data$term)
+test_data$emp_length <- as.factor(test_data$emp_length)
+test_data$home_ownership <- as.factor(test_data$home_ownership)
+test_data$verification_status <- as.factor(test_data$verification_status)
+test_data$purpose <- as.factor(test_data$purpose)
+test_data$repay_fail <- as.factor(test_data$repay_fail)
+```
+
 
 ```{r convert_vars_to_factors_val}
 val_data$term <- as.factor(val_data$term)
@@ -262,6 +273,17 @@ train_data[, numeric_columns] <- scale(train_data[, numeric_columns])
 train_scaled_data <- train_data %>%
   mutate_if(is.numeric, scale)
 ```
+
+```{r}
+numeric_columns <- sapply(test_data, is.numeric)  # Identify numeric columns
+
+# Scale the numeric columns while keeping column names
+test_data[, numeric_columns] <- scale(test_data[, numeric_columns])
+
+test_scaled_data <- test_data %>%
+  mutate_if(is.numeric, scale)
+```
+
 
 ```{r val_standardisation}
 numeric_columns <- sapply(val_data, is.numeric)  # Identify numeric columns
@@ -467,6 +489,18 @@ model_results <- data.frame(
 
 knitr::kable(
   model_results,
+  col.names = c("Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
+)
+```
+
+Displaying only those variables whose p-value is less than 0.05:
+```{r}
+# Filter rows where p-value is less than 0.05
+significant_results <- model_results[model_results$p_value < 0.05, ]
+
+# Print the significant results
+knitr::kable(
+  significant_results,
   col.names = c("Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
 )
 ```
