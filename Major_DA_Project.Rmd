@@ -788,11 +788,11 @@ standard_errors2 <- summary_fit5$coef[, "Std. Error"]
 p_values2 <- summary_fit5$coef[, "Pr(>|z|)"]
 
 # Calculate the odds ratios by exponentiating the parameter estimate values
-odds_ratios2 <- exp(parameter_estimates)
+odds_ratios2 <- exp(parameter_estimates2)
 
 # Calculate the confidence intervals for the odds ratios
-lower_ci2 <- exp(parameter_estimates - 1.96 * standard_errors)  # 1.96 corresponds to a 95% confidence interval
-upper_ci2 <- exp(parameter_estimates + 1.96 * standard_errors)
+lower_ci2 <- exp(parameter_estimates2 - 1.96 * standard_errors2)  # 1.96 corresponds to a 95% confidence interval
+upper_ci2 <- exp(parameter_estimates2 + 1.96 * standard_errors2)
 
 model_results2 <- data.frame(
   Estimate = parameter_estimates2,
