@@ -788,11 +788,11 @@ standard_errors2 <- summary_fit5$coef[, "Std. Error"]
 p_values2 <- summary_fit5$coef[, "Pr(>|z|)"]
 
 # Calculate the odds ratios by exponentiating the parameter estimate values
-odds_ratios2 <- exp(parameter_estimates)
+odds_ratios2 <- exp(parameter_estimates2)
 
 # Calculate the confidence intervals for the odds ratios
-lower_ci2 <- exp(parameter_estimates - 1.96 * standard_errors)  # 1.96 corresponds to a 95% confidence interval
-upper_ci2 <- exp(parameter_estimates + 1.96 * standard_errors)
+lower_ci2 <- exp(parameter_estimates2 - 1.96 * standard_errors2)  # 1.96 corresponds to a 95% confidence interval
+upper_ci2 <- exp(parameter_estimates2 + 1.96 * standard_errors2)
 
 model_results2 <- data.frame(
   Estimate = parameter_estimates2,
@@ -820,6 +820,25 @@ knitr::kable(
   significant_results2,
   col.names = c("Estimate", "Odds Ratio", "Lower Bound (2.5%)", "Upper Bound (97.5%)", "p-value")
 )
+```
+
+## Odds ratio plot for the final model of GLMM
+
+```{r odds_ratio_plot_GLM}
+plot_data <- data.frame(
+  Variable = rownames(model_results2),
+  OddsRatio = model_results2$OddsRatio,
+  LowerCI = model_results2$LowerCI,
+  UpperCI = model_results2$UpperCI
+)
+
+ggplot(plot_data, aes(x = OddsRatio, xmin = LowerCI, xmax = UpperCI, y = Variable)) +
+  geom_point(size = 3, color="red") +
+  geom_errorbarh(height = 0.2, color = "blue") +
+  xlim(c(0, max(plot_data$UpperCI + 1))) +  
+  theme_minimal() +
+  labs(x = "Odds Ratio", y = "Variable") +
+  ggtitle("Odds Ratios of Rapyment Failure for GLMM")
 ```
 
 ### Interpretations
