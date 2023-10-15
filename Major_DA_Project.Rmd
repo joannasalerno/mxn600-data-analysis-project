@@ -734,13 +734,6 @@ fit_var_6 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
 
 *** EXPLAIN
 
-```{r runing_options - will be deleted}
-# tuning options
-# fit_var_2 <- update(fit_var_1, control = glmerControl(optimizer = "Nelder_Mead"))
-# fit_var_3 <- update(fit_var_1, control = glmerControl(optimizer = "Nelder_Mead", tolPwrss = 1e-4))
-# fit_var_4 <- update(fit_var_2, control = glmerControl(optCtrl=list(maxfun=2e4)))
-```
-
 
 ## Analyse Performance Benchmarks with Extended Model
 
