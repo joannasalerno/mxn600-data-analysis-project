@@ -76,7 +76,6 @@ At first glance of the first 6 rows of this dataset, we notice there is a value 
 dim(train_data)
 ```
 
-
 The training dataset contains a total of 23,052 observations of 19 variables.
 
 ```{r data_structure}
@@ -122,9 +121,11 @@ head(na_rows)
 Based on the above output, there are a total of 591 n/a (string) in this dataset. These all appear to be from the employment length column. We will move forward and assume that this is not truly missing data, but rather, means that the applicant is not currently employed. We will further examine the ditribution of each variable by creating exploratory plots, and this will further clarify the meaning of some of the values contained within each column of the dataset.
 
 ## Exploratory Plots
+### Data Preparation
 
 Before we can create exploratory plots, there are a few variables we will need to convert to factors. This will help us in creating our visualizations as well as conducting our analyses, so we can consider the selected variables as factors with different levels rather than simply strings.
 
+Training dataset:
 ```{r convert_vars_to_factors_train}
 train_data$term <- as.factor(train_data$term)
 train_data$emp_length <- as.factor(train_data$emp_length)
@@ -134,7 +135,8 @@ train_data$purpose <- as.factor(train_data$purpose)
 train_data$repay_fail <- as.factor(train_data$repay_fail)
 ```
 
-```{r}
+Test dataset:
+```{r convert_vars_to_factors_test}
 test_data$term <- as.factor(test_data$term)
 test_data$emp_length <- as.factor(test_data$emp_length)
 test_data$home_ownership <- as.factor(test_data$home_ownership)
@@ -143,7 +145,7 @@ test_data$purpose <- as.factor(test_data$purpose)
 test_data$repay_fail <- as.factor(test_data$repay_fail)
 ```
 
-
+Validation dataset:
 ```{r convert_vars_to_factors_val}
 val_data$term <- as.factor(val_data$term)
 val_data$emp_length <- as.factor(val_data$emp_length)
@@ -153,15 +155,19 @@ val_data$purpose <- as.factor(val_data$purpose)
 val_data$repay_fail <- as.factor(val_data$repay_fail)
 ```
 
+Now, we'd like to briefly check whether there is an imbalance in the cases of repay_fail.
+
 ```{r check_imbalance_data}
 plot(train_data$repay_fail)
 ```
 
-Despite the significant class imbalance in the dataset, logistic regression still maintains its probabilistic nature. However, it's important to note that imbalanced data can affect the model's predictive performance, potentially leading to a bias towards the majority class.
+Despite the significant class imbalance (repay_fail==0 v. repay_fail==1) in the dataset, logistic regression still maintains its probabilistic nature. However, it's important to note that imbalanced data can affect the model's predictive performance, potentially leading to a bias towards the majority class.
 
-Now, we will create some histograms to visualize the distributions of some of the string/character variables in this dataset.
+### Variable Distributions
 
-```{r histograms}
+Now, we will create some plots to visualize the distributions of some of the variables in this dataset.
+
+```{r plots_1}
 p1 <- ggplot(data = train_data, aes(int_rate, fill = repay_fail)) +
   geom_histogram(binwidth=5)
 
@@ -198,7 +204,7 @@ Plot4 is a boxplot that compares annual income between successful and unsuccessf
 
 Plot5 is scatter plot that displays relationship annual income and loan amount. 
 
-Here we create some distribution plots to have a better visualization of the data:
+Now, we will visualize the distribution of each of the numeric variables in the dataset, using histograms:
 
 ```{r dist_plots_1}
 numeric_vars <- c("loan_amnt", "annual_inc", "dti", "delinq_2yrs", "inq_last_6mths",
@@ -210,7 +216,7 @@ for (var in numeric_vars) {
 }
 ```
 
-The above plot displays the distribution of all numeric variables in the dataset in the form of a histogram. 
+*** EXPLAIN
 
 ```{r dist_plots_2}
 ggplot(train_data, aes(x = purpose)) +
@@ -219,7 +225,7 @@ ggplot(train_data, aes(x = purpose)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-The above bar plot represents the frequency of each unique value in the purpose variable. From the plot it can be seen that the most common reasons to take loans are debt_consolidation, credit_card, home_improvement and car.
+The above bar plot represents the frequency of each unique value in the purpose variable. From the plot, it can be seen that the most common reasons to take out loans are for debt consolidation, credit cards, home improvement, and cars.
 
 ```{r dist_plots_3}
 ggplot(train_data, aes(x = term, y = loan_amnt)) +
@@ -227,8 +233,9 @@ ggplot(train_data, aes(x = term, y = loan_amnt)) +
   labs(x = "Term", y = "Loan Amount")
 ```
 
-The above plot consists of two side-by-side boxplots, one for each loan term category. Each boxplot provides information about the distribution of loan amounts for its respective term category. Based on the plot, we can see that, on average, loans with 60 months term have higher loan amounts than those with a 36 month term which is an expected behaviour. Also, we can observe some outliers in the 36 months term which indicates that there are a few loan amounts significantly higher than the typical range of loan amounts for that category.
+The above plot consists of two side-by-side boxplots, one for each loan term category. Each boxplot provides information about the distribution of loan amounts for its respective term category. Based on the plot, we can see that, on average, loans with 60-month terms have higher loan amounts than those with 36-month terms, which is an expected behaviour. Also, we can observe some outliers in the 36-month terms, which indicates that there are a few loan amounts which are significantly higher than the typical range of loan amounts for this term category.
 
+*** KEEP OR REMOVE?? Output is huge, we have kept it commented out as it does not display well here.
 Now, we will create a plot that depicts the correlation between the different numeric variables; it includes both correlation coefficients and visuals of the distribution of each included variable.
 
 ```{r ggpairs_plot}
@@ -254,7 +261,7 @@ The correlation matrix (heatmap) reveals several noteworthy patterns:
 
 Upon reviewing the correlation matrix, it becomes evident that certain features exhibit a high degree of positive correlation, such as "total_acc" and "open_acc." Additionally, "credit_age_yrs" and "total_acc," as well as "revol_util" and "int_rate," while not displaying correlations as strong as those between "total_acc" and "open_acc," still exhibit a notable level of correlation.
 
-Furthermore, following our examination of this matrix, each variable within pairs of highly correlated predictors will be analyzed while fitting models with the goal of identifying and refining the best model.
+Following our examination of this matrix, each variable within pairs of highly correlated predictors will be analyzed while fitting models with the goal of identifying and refining the best model.
 
 # New Credit Risk Model
 
@@ -262,8 +269,11 @@ Keeping our above exploratory analysis in mind, as well as reviewing the [Five C
 
 annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, revol_util, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs, pub_rec
                    
+## Variable Standardization
+
 Now, we'll move on to building our first model. We'll first need to standardize our numeric variables so that they can be accurately compared:
 
+Training dataset standardization:
 ```{r train_standardisation}
 numeric_columns <- sapply(train_data, is.numeric)  # Identify numeric columns
 
@@ -274,7 +284,8 @@ train_scaled_data <- train_data %>%
   mutate_if(is.numeric, scale)
 ```
 
-```{r}
+Test dataset standardization:
+```{r test_standardisation}
 numeric_columns <- sapply(test_data, is.numeric)  # Identify numeric columns
 
 # Scale the numeric columns while keeping column names
@@ -284,7 +295,7 @@ test_scaled_data <- test_data %>%
   mutate_if(is.numeric, scale)
 ```
 
-
+Validation dataset standardization:
 ```{r val_standardisation}
 numeric_columns <- sapply(val_data, is.numeric)  # Identify numeric columns
 
@@ -295,112 +306,161 @@ val_scaled_data <- val_data %>%
   mutate_if(is.numeric, scale)
 ```
 
-## Logit Link Function
+## Variable Selection
 
-First we decided to perform stepAIC to get important covariates from the dataset.
+First, we have decided to perform stepwiseAIC to identify the most important predictors of loan default, from the list of variables we identified above: annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, revol_util, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs, pub_rec.
 
-```{r}
-#Full model for backwards selection:
-full_model <- glm(repay_fail ~ loan_amnt + term + int_rate + emp_length + home_ownership + annual_inc + verification_status + purpose + dti + delinq_2yrs + inq_last_6mths + open_acc + pub_rec + revol_bal + revol_util + total_acc + credit_age_yrs, 
-                 data = train_scaled_data, family = "binomial")
+```{r stepAIC}
+# Full model for backwards selection:
+full_model <- glm(repay_fail ~ loan_amnt + term + int_rate + emp_length + home_ownership + annual_inc + verification_status + purpose + dti + delinq_2yrs +
+                    inq_last_6mths + open_acc + pub_rec + revol_bal + revol_util + total_acc + credit_age_yrs,
+                  data = train_scaled_data, family = "binomial")
 
-#Model with no variables present for forwards selection:
+# Model with no variables present for forwards selection:
 null_model <- glm(data = train_scaled_data,
     formula = repay_fail ~ 1,
     family = "binomial")
 
-#Perform backward and forward selection:
-backward_sel_model <- stepAIC(
-  full_model, direction = "backward",trace = 0)
+# Perform backward and forward selection:
+backward_sel_model <- stepAIC(full_model, direction = "backward", trace = 0)
+
 forward_sel_model <- stepAIC(
   null_model,
   scope = formula(full_model),
   direction = "forward",
-  trace = 0) ## trace = 0 prevents automatic output of stepAIC function.
+  trace = 0) # prevents automatic output of stepAIC function
 ```
 
-```{r}
+Now, we can view the model formulas and AIC values to ultimately choose the best one:
+
+```{r backward_formula}
 formula(backward_sel_model)
 ```
 
-create a model using the formula suggested by stepAIC:
-
-```{r}
-model1 <- glm(repay_fail ~ term + int_rate + emp_length + annual_inc + purpose + 
-    inq_last_6mths + pub_rec + revol_bal + revol_util, data = train_scaled_data, family = binomial)
+```{r forward_formula}
+formula(forward_sel_model)
 ```
 
-```{r}
+```{r backward_aic}
+AIC(backward_sel_model)
+```
+
+```{r forward_aic}
+AIC(forward_sel_model)
+```
+
+Based on the above output, both models produced the same formula (same list of covariates), as well as the same AIC values ($AIC = 18160.57$). Thus, we can select either to move forward with. We will choose the backward selection model, and will print the formula below again for review.
+
+```{r chosen_formula}
+formula(backward_sel_model)
+```
+
+According to stepwiseAIC, the best predictors of repay_fail are term, int_rate, emp_length, annual_inc, purpose, inq_last_6mths, pub_rec, revol_bal, and revol_util. We will move forward with these covariates to finetune a model that not only fits the data well but improves predictive performance compared to the credit risk model the bank has been using.
+
+First, we'll create a model using the same exact formula suggested by stepAIC:
+
+```{r fit_model1}
+model1 <- glm(repay_fail ~ term + int_rate + emp_length + annual_inc + purpose + 
+                inq_last_6mths + pub_rec + revol_bal + revol_util,
+              data = train_scaled_data, family = "binomial")
+```
+
+Print the model's AIC:
+
+```{r aic_model1}
 AIC(model1)
 ```
-Now creating a model a few interactions based on most relevance:
 
-```{r}
+As we already saw above and just reviewed, this model has an $AIC = 18160.57$. Next, we will add a few interactions between some of the covariates that make the most sense based on our credit risk research.
+
+```{r fit_model2}
 model2 <- glm(repay_fail ~ term + int_rate + emp_length + annual_inc + purpose + 
-    inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate + term * emp_length + term * annual_inc + term * purpose + term * pub_rec + int_rate * emp_length + int_rate * pub_rec + int_rate * annual_inc, data = train_scaled_data, family = binomial)
+                inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
+                term * emp_length + term * annual_inc + term * purpose + term * pub_rec +
+                int_rate * emp_length + int_rate * pub_rec + int_rate * annual_inc,
+              data = train_scaled_data, family = "binomial")
 ```
 
-```{r}
+Print the model's AIC:
+
+```{r aic_model2}
 AIC(model2)
 ```
 
-The AIC of the new model is higher. We will now do an Anova test to confirm whether the addition of these interactions are adding value to the model compared to model without interactions:
+The AIC of the new model is higher, with a value of 18173.81. This is to be expected, though, as this new model is penalized for having more covariates than the first model we fit. We will now perform a $\chi^2$-test to confirm whether the addition of these interactions are adding value to the model compared to the model without any interaction terms:
 
-```{r}
+```{r anova_model1_model2}
 anova(model1, model2, test = "Chisq")
 ```
 
-Based on the anova test, Model 2 is significantly better at explaining the variation in the dependent variable repay_fail compared to Model 1.
+As the $\chi^2$-test has a $p < 0.05$, this provides us with enough evidence to reject the null hypothesis that model 1 without interactions and model 2 with interactions explain the same amount of variation in the data. In other words, model 2 is significantly better at explaining the variation in the data compared to model 1. Thus, we will consider interactions between covariates. However, we will now decrease the number of interactions in our model, as model 2 included quite a few interactions. We will only consider the interaction between term and interest rate, as it seems to make sense that these two covariates together would have an impact on loan default risk.
 
-```{r}
+```{r fit_model3}
 model3 <- glm(repay_fail ~ term + int_rate + emp_length + annual_inc + purpose +
-   inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate + term * emp_length + term * annual_inc + term * purpose + term * pub_rec,
-     data = train_scaled_data, family = binomial)
+                inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
+              data = train_scaled_data, family = "binomial")
 ```
 
-```{r}
+Print the model's AIC:
+
+```{r aic_model3}
 AIC(model3)
 ```
 
-Model3 has the lowest AIC so far as compared to all other models we built.
+The AIC of model 3 is lower than that of both model 1 and model 2. We will now conduct $\chi^2$-tests to confirm whether model 3 is significantly better at explaining the variation in the data than both model 1 and model 2.
 
-```{r}
+```{r anova_model1_model3}
 anova(model1, model3, test = "Chisq")
 ```
 
-Based on the anova test, Model 3 is significantly better at explaining the variation in the dependent variable repay_fail compared to Model 1.
+```{r anova_model2_model3}
+anova(model2, model3, test = "Chisq")
+```
 
-```{r}
+As both $\chi^2$-tests have a $p < 0.05$, this indicates that model 3 is significantly better at explaining the variation in the data, as compared to both model 1 and model 2. We will move forward with model 3.
+
+```{r summary_model3}
 summary(model3)
 ```
 
-Now we select only the significant covariates from the above model to try and build a model with even lower AIC.
+## Logit Link Function
 
-Fit logit model:
+Next, we will fit a model using the logit link function, with our final list of covariates.
 
 ```{r fit_logit}
 fit_logit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + 
                    inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
-                 data = train_scaled_data, family = binomial) #18156.43 
+                 data = train_scaled_data, family = binomial)
 
- AIC(fit_logit)
+AIC(fit_logit)
 ```
-This model gives the lowest AIC, hence we chose to proceed with this model.
+
+This model has the lowest AIC value we have received thus far, and this, as well as the results of our $\chi^2$-tests, indicate that this is the best model at the moment. Thus, we will proceed with this model.
 
 ```{r summary_fit_logit}
 summary(fit_logit)
 ```
 
+### Logit Model GOF
+
+Before we try to interpret this model's summary, we will first check the goodness-of-fit to determine whether this model is actually a good fit for the data.
 
 ```{r fit_logit_resid}
 # simulate residuals from the model:
 res = simulateResiduals(fit_logit)
 
-# plot observed quantile versus expected quantile to assess distribution fit, and predicted value versus standardised residuals for unmodelled pattern in the residuals
+# plot observed quantile versus expected quantile to assess distribution fit, and
+# predicted value versus standardised residuals for unmodelled pattern in the residuals
 plot(res)
 ```
-DHARMA residual plots shows no sign of overdispersion: The distribution test (KS), Dispersion test and outlier test all are non-significant means there is evidence to suggest that the distribution of the simulated quantiles follows a uniform distribution. Additionally, the quantiles of the residuals (red lines) show a uniform pattern for predicted values (second plot).
 
+The above DHARMA residuals plots shows no sign of overdispersion. The distribution test (KS), dispersion test, and outlier test all are non-significant, which means there is evidence to suggest that the distribution of the simulated quantiles follows a uniform distribution. Additionally, in the second plot, the quantiles of the residuals (red lines) show a uniform pattern for predicted values.
+
+### Logit Model: Predictive Performance
+
+Next, we will analyse the predictive performance of our logit model. After all, this is one of the main reasons we've been tasked with conducting this analysis.
+
+Training dataset ROC:
 ```{r train_roc}
 # ROC curve on scaled train data 
 prob=predict(fit_logit,type=c("response"))
@@ -412,6 +472,7 @@ Gini
 plot(g)
 ```
 
+Validation dataset ROC:
 ```{r val_roc}
 # ROC curve on scaled validation data
 prob=predict(fit_logit,newdata=val_scaled_data,type=c("response"))
@@ -422,17 +483,24 @@ Gini <- 2*(AUC - 1/2)
 Gini
 plot(g)
 ```
-The Gini score for the fitted logistic regression model is 0.410 on the training set and 0.395 on the validation set. Both of these scores are higher than those of the old model. Additionally, the ROC curve for the new model is positioned closer to the top-left corner compared to the old model. These findings collectively indicate that the new model is better than the old one.
+
+The Gini score for the fitted logistic regression model is 0.410 on the training dataset and 0.395 on the validation dataset. Both of these scores are higher than those of the old model ($Gini=0.114$ for train, $Gini=0.110$ for validation). Additionally, the ROC curve for the new model is positioned closer to the top-left corner compared to the old model. These findings collectively indicate that the new model is better than the old one at predicting whether loan applicants will default.
 
 ## Probit Link Function
 
+We will now test whether using a probit link function changes the AIC or predictive performance of our model.
+
 ```{r fit_probit}
-fit_probit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
-    data = train_scaled_data, family = binomial("probit"))
+fit_probit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths +
+                    pub_rec + revol_bal + revol_util + term * int_rate,
+                  data = train_scaled_data, family = binomial("probit"))
 
 AIC(fit_probit)
 ```
 
+### Probit Model: Predictive Performance
+
+Training dataset:
 ```{r probit_train_roc}
 # Probit model: ROC curve on scaled train data 
 prob=predict(fit_probit,type=c("response"))
@@ -444,6 +512,7 @@ Gini
 plot(g)
 ```
 
+Validation dataset:
 ```{r probit_val_roc}
 # Probit model: ROC curve on scaled validation data 
 prob=predict(fit_probit,newdata = val_scaled_data,type=c("response"))
@@ -454,21 +523,28 @@ Gini <- 2*(AUC - 1/2)
 Gini
 plot(g)
 ```
-While fit_probit model has lower AIC than fit_logit, but has slightly lower Gini score on the validation set.
+
+While the model fit with a probit link function has lower AIC than the model with a logit link function, the probit model has a slightly lower Gini score on the validation set. We'll consider the logit model as better than the probit model.
 
 ## Cloglog Link Function
 
+Finally, we will test whether using a cloglog link function changes the AIC or predictive performance of our model.
+
 ```{r fit_cloglog}
-fit_cloglog <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
-    data = train_scaled_data, family = binomial("cloglog")) #18156.43
+fit_cloglog <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths +
+                     pub_rec + revol_bal + revol_util + term * int_rate,
+                   data = train_scaled_data, family = binomial("cloglog"))
 
 AIC(fit_cloglog)
 ```
-fit_cloglog has highr AIC compare to both ligit_fit and probit_fit models.
 
-Based on comparison conducted between three different link functions for our glm model, we decided to keep fit_logit as our final since it showed better performance.
+As can be seen above, the model fit with the cloglog link function has a higher AIC than both the logit and probit models.
 
-## Calculate odds ratio and CI for the final model of GLM
+Based on the comparisons conducted between the three different link functions for our GLM model, we will choose to use the model with the logit link function as our final model. This model demonstrated the best combination of AIC value and predictive performance compared to the other models.
+
+## Calculate Odds Ratio and CI
+
+Next, we will calculate the odds ratios and confidence intervals for our final model. As this model was fit using the logit link function, we can exponentiate the estimates to get the odds ratio for each covariate.
 
 ```{r odds_ratio_GLM}
 summary_logit <- summary(fit_logit)
@@ -499,8 +575,9 @@ knitr::kable(
 )
 ```
 
-Displaying only those variables whose p-value is less than 0.05:
-```{r}
+Displaying only those variables whose p-value < 0.05:
+
+```{r sig_results}
 # Filter rows where p-value is less than 0.05
 significant_results <- model_results[model_results$p_value < 0.05, ]
 
@@ -515,40 +592,43 @@ knitr::kable(
 
 Listed below are interpretations of the covariates of our final model:
 
-- The intercept is statistically significant for individuals who have been employed for less than one year, are seeking a car loan, and have a 36-month loan term when all other predictors are equal to zero.
+- The intercept or baseline refers to individuals who have been employed for less than one year, are seeking a car loan, and have a 36-month loan term when all other numeric predictors are equal to zero, and is statistically significant (95% CI: [0.08,0.13], $p < 2e-16$).
 
-- For a one-unit increase in the interest rate, the odds of "repay_fail" occurring increase by a factor of approximately 1.57 (95% CI: 1.48-1.67). This is a significant effect with a very low p-value.
+- For a one-unit increase in the interest rate, the odds of "repay_fail" occurring increase by a factor of approximately 1.57 (95% CI: [1.48,1.67], $p < 2e-16$), compared to baseline.
 
-- For individuals with 1 to 10 plus years of employment, none of these employment lengths have a significant effect on the odds of "repay_fail" occurring compared to the reference category (less than one year"). Their odds ratios are close to 1, and their p-values are above 0.05, indicating that these employment lengths do not significantly impact the likelihood of loan repayment failure.
+- For individuals with 1 to 10 plus years of employment, none of these employment lengths have a significant effect on the odds of "repay_fail" occurring compared to the reference category (less than one year). Their odds ratios are close to 1, and all $p > 0.05$, indicating that these employment lengths do not significantly impact the likelihood of loan repayment failure.
 
-For individuals with missing or not specified employment length, or unemployed individual ("n/a"), For a one-unit increase in the emp_lengthn/a, the odds of "repay_fail" occurring increase by a factor of approximately 1.73 (95% CI: 1.37-2.19). This effect is statistically significant with a very low p-value, indicating that the absence of employment length information or for unemployed individual is associated with a higher likelihood of loan repayment failure.
+For individuals with missing/unspecified employment lengths or unemployed individuals ("n/a"), the odds of "repay_fail" occurring increase by a factor of approximately 1.73 (95% CI: [1.37,2.19], $p = 4.11e-06$), compared to baseline. This indicates that the absence of employment length information is associated with a higher likelihood of loan repayment failure.
 
-- For a one-unit increase in annual income, the odds of "repay_fail" occurring decrease by a factor of approximately 0.71 (95% CI: 0.67-0.75). This is a significant effect with a very low p-value.
+- For a one-unit increase in annual income, the odds of "repay_fail" occurring decrease by a factor of approximately 0.71 (95% CI: [0.67,0.75], $p < 2e-16$), compared to baseline.
 
-- For loans with the purpose of credit_card, debt_consolidation, educational, home_improvement, house, major_purchase, renewable_energy and wedding there is no significant effect on the odds of "repay_fail" occurring compared to the reference category (car). The p-value is above 0.05, indicating that these loan purposes do not significantly impact the likelihood of loan repayment failure.
+- For loans with a stated purpose of "credit card", "debt consolidation", "educational", "home improvement", "house", "major purchase", "renewable energy", and "wedding", there is no significant effect on the odds of "repay_fail" occurring compared to the reference category (car). As all $p > 0.05$, these loan purposes do not significantly impact the likelihood of loan repayment failure.
 
-For a one-unit increase in medical purpose, the odds of "repay_fail" occurring increase by a factor of approximately 1.83 (95% CI: 1.30-2.57).
-For a one-unit increase in moving purpose, the odds of "repay_fail" occurring increase by a factor of approximately 1.65 (95% CI: 1.15-2.36).
-For a one-unit increase in other purpose, the odds of "repay_fail" occurring increase by a factor of approximately 1.58 (95% CI: 1.24-2.00).
-For a one-unit increase in small business purpose, the odds of "repay_fail" occurring increase by a factor of approximately 2.78 (95% CI: 2.15-3.59).  This effect is statistically significant with a very low p-value, indicating that the small business loan purpose is associated with a higher likelihood of loan repayment failure.
-For a one-unit increase in vacation purpose, the odds of "repay_fail" occurring increase by a factor of approximately 1.56 (95% CI: 1.01-2.43). 
+For loans with a stated purpose of "medical", the odds of "repay_fail" occurring increase by a factor of approximately 1.83 (95% CI: [1.30-2.57], $p = 0.000502$), compared to the baseline.
 
-The specific loan purposes "medical," "moving," "other," and "small_business" are associated with a higher likelihood of loan repayment failure, and these effects are statistically significant. The effect of small business loan purpose is the most significant. "vacation" loans also have a statistically significant effect but to a lesser degree.
+For loans with a stated purpose of "moving", the odds of "repay_fail" occurring increase by a factor of approximately 1.65 (95% CI: [1.15,2.36], $p = 0.006978$), compared to baseline.
+
+For loans with a stated purpose of "other", the odds of "repay_fail" occurring increase by a factor of approximately 1.58 (95% CI: [1.24,2.00], $p = 0.000211$), compared to baseline.
+
+For loans with a stated purpose of "small business", the odds of "repay_fail" occurring increase by a factor of approximately 2.78 (95% CI: [2.15,3.59], $p = 5.80e-15$), compared to baseline.
+
+For loans with a stated purpose of "vacation", the odds of "repay_fail" occurring increase by a factor of approximately 1.56 (95% CI: [1.01,2.43], $p = 0.047421$), compared to baseline. 
  
-- For a one-unit increase in the number of inquiries in past 6 months, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: 1.20-1.28). This is a significant effect with a very low p-value.
+- For a one-unit increase in the number of inquiries in past 6 months, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: [1.20,1.28], $p < 2e-16$), compared to baseline.
 
-- For a one-unit increase in the number of derogatory public records, the odds of "repay_fail" occurring increase by a factor of approximately 1.06 (95% CI: 1.03-1.10). 
+- For a one-unit increase in the number of derogatory public records, the odds of "repay_fail" occurring increase by a factor of approximately 1.06 (95% CI: [1.03,1.10], $p = 0.000332$), compared to baseline. 
 
-- For a one-unit increase in revolving balance, the odds of "repay_fail" occurring increase by a factor of approximately 1.10 (95% CI: 1.06-1.14).
+- For a one-unit increase in revolving balance, the odds of "repay_fail" occurring increase by a factor of approximately 1.10 (95% CI: [1.06,1.14], $p = 5.70e-06$), compared to baseline.
 
-- For a one-unit increase in revolving utilization, the odds of "repay_fail" occurring increase by a factor of approximately 1.12 (95% CI: 1.07-1.18).
+- For a one-unit increase in revolving credit utilization, the odds of "repay_fail" occurring increase by a factor of approximately 1.12 (95% CI: [1.07,1.18], $p = 4.05e-07$), compared to baseline.
 
-- Having a 60-month loan term increases the odds of "repay_fail" occurring by a factor of approximately 1.67 (95% CI: 1.51-1.85) compared to the reference category (36 months loan term).
+- Having a 60-month loan term increases the odds of "repay_fail" occurring by a factor of approximately 1.67 (95% CI: [1.51,1.85], $p < 2e-16$), compared to the reference category (36 months loan term).
 
-- The negative interaction term between interest rate and the 60-month term suggests that the effect of interest rate on "repay_fail" is less severe for loans with a 60-month term compared to the reference category 36 months terms. In other words, while interest rate still matters for loan repayment, its impact is less pronounced for loans with longer terms.
-For a one-unit increase in interest rate, the odds of loan repayment failure decrease by a factor of approximately 0.9 (95% CI: 0.82-0.98) when the loan term is 60 months. The relationship between interest rate and loan repayment may differ depending on the term length, with the effect being less pronounced for longer-term loans.
+- The negative estimate for the interaction between interest rate and the 60-month term suggests that the effect of interest rate on "repay_fail" is less severe for loans with a 60-month term compared to the reference category of the 36-month term. In other words, while interest rate still has a significant impact on loan repayment on its own, its impact differs for loans with longer terms.
 
-## Odds ratio plot for the final model of GLM
+The interaction between interest rate and the 60-month loan term decreases the odds of "repay_fail" by a factor of approximately 0.90 (95% CI: [0.82,0.98], $p = 013086$), compared to baseline. The relationship between interest rate and loan repayment may differ depending on the term length, with the effect changing for longer-term loans.
+
+## Odds Ratio Plot with CIs
 
 ```{r odds_ratio_plot_GLM}
 plot_data <- data.frame(
@@ -566,9 +646,12 @@ ggplot(plot_data, aes(x = OddsRatio, xmin = LowerCI, xmax = UpperCI, y = Variabl
   labs(x = "Odds Ratio", y = "Variable") +
   ggtitle("Odds Ratios of Rapyment Failure for GLM")
 ```
-Odds Ratio of Repayment Failure for GLM model including Confidence Interval ranges compared to baseline 36 months term, less than one year employment length, and loan purpose for car.
 
-## Calculate accuracy and confusion matrix for the final model of GLM
+Odds ratio of repayment failure for GLM model including confidence interval ranges compared to baseline: 36-month term, less than one year of employment, and loan purpose = car.
+
+## Accuracy and Confusion Matrix
+
+Finally, we will create a confusion matrix to demonstrate our final model's performance of classifying whether applicants will default on their payments or not.
 
 ```{r accuracy_confmatrix_GLM}
 fit_logit <- ifelse(prob > 0.5, "1", "0")
@@ -699,9 +782,12 @@ fit_var_5 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
                                           check.conv.grad = .makeCC("warning", tol = 8e-3, relTol = NULL)))
 ```
 
+Model summary:
+
 ```{r}
 summary(fit_var_5)
 ```
+
 ```{r extended_roc}
 par(mfrow = c(1, 2))
 # ROC curve on scaled extended data  for fit_var_4
@@ -758,12 +844,17 @@ plot(res)
 ```
 
 Does the model fit the data well?
+
 ```{r Goodness-of-fit}
-plot(residuals(fit_var_5))
+plot(residuals(fit_var_5),
+     ylab = "Residuals")
 ```
+
 Look at the distribution of the random effects:
+
 ```{r res,include=TRUE}
 res <- ranef(fit_var_5)
+
 hist(res$earliest_cr_line[,1])
 
 hist(res$location[,1])
