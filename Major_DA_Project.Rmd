@@ -216,9 +216,9 @@ for (var in numeric_vars) {
 }
 ```
 
-We conducted an exploratory data analysis of our dataset, focusing on the numeric variables of interest. The above plots shows the distribution of these variables. This analysis revealed that several variables, namely 'annual_inc,' 'delinq_2yrs,' 'inq_last_6mths,' 'pub_rec,' and 'revol_bal,' exhibited significant outliers, which can potentially impact the integrity of our analysis.
+The above plots shows the distribution of the numeric variables within the dataset. These reveal that several variables, namely 'annual_inc,' 'delinq_2yrs,' 'inq_last_6mths,' 'pub_rec,' and 'revol_bal,' exhibit significant outliers, which can potentially impact the integrity of our analysis.
 
-To address the presence of these outliers and to ensure the robustness of our subsequent statistical modeling, we have chosen to apply a scaling transformation to the numeric covariates in the dataset. The resulting scaled covariates will enable us to conduct our analysis with a dataset that has been preprocessed to reduce the undue impact of outliers.
+To address the presence of these outliers and to ensure the robustness of our subsequent statistical modeling, we have chosen to apply a scaling transformation to the numeric covariates in the dataset. The resulting scaled variables will enable us to conduct our analysis with a dataset that has been preprocessed to reduce the undue impact of outliers.
 
 ```{r dist_plots_2}
 ggplot(train_data, aes(x = purpose)) +
@@ -273,7 +273,7 @@ annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership
                    
 ## Variable Standardization
 
-Now, we'll move on to building our first model. We'll first need to standardize our numeric variables so that they can be accurately compared:
+Now, we'll move on to building our first model. We'll first need to standardize our numeric variables, because, as mentioned above, many of them have differing ranges and some include outliers. Scaling these numeric variables will allow for more accurate comparison so that all variables are on a similar scale.
 
 Training dataset standardization:
 ```{r train_standardisation}
@@ -723,74 +723,75 @@ extended_scaled <- extended %>%
 
 ## Fit Models
 
-Fit first model, with only the state as a random effect:
+We will begin to fit a GLMM to address this part of our analysis. We will use the same general model formula in terms of the inclusion of the same covariates. What will differ is the inclusion of random effects in this extended model. We will include random effects to account for variation in time and applicant location. We begin by fitting a model with just state as a random effect:
 
 ```{r extended_fit1}
 fit_var_1 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
                      inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
-                     (1|addr_state), data = extended_scaled, family = binomial)
+                     (1|addr_state), data = extended_scaled, family = "binomial")
 ```
 
-View first model summary with AIC equal to 30131.5:
+View first extended model summary with:
 
-```{r}
+```{r summary_fit_var_1}
 summary(fit_var_1)
 ```
 
-Next, we'll add in another random effect of time, which is included as the variable "earliest_cr_line":
+As can be seen above, this model has an AIC value of 30131.5. Next, we'll add in another random effect of time, which is included as the variable "earliest_cr_line":
 
-```{r}
+```{r fit_var_2}
 fit_var_2 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
                      inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
-                     (1|addr_state) + (1|earliest_cr_line), data = extended_scaled, family = binomial)
+                     (1|addr_state) + (1|earliest_cr_line), data = extended_scaled, family = "binomial")
 ```
 
 Adding in time as a random effect caused a failed to converge warning. Thus, we will now increase the tolerance of this model to see if this helps:
 
-```{r}
+```{r fit_var_3}
 fit_var_3 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
                      inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
-                     (1|addr_state) + (1|earliest_cr_line), data = extended_scaled, family = binomial,
+                     (1|addr_state) + (1|earliest_cr_line), data = extended_scaled, family = "binomial",
                    control = glmerControl(check.conv.grad = .makeCC("warning", tol = 3e-3, relTol = NULL)))
 ```
 
 The model ran successfully, so we'll take a look at the summary:
-AIC is 30126.5, and is lower than fit_var_1 which indicates the new model with both added random effects addr_state and earliest_cr_line is a better fit.
 
 ```{r}
 summary(fit_var_3)
 ```
 
-Finally, we'll add in one more random effect, which is zip code. Once again, we will fit this model with an increased tolerance, compared to the default tolerance:
+The AIC value 30126.5, which is lower than that of the first extended model (fit_var_1). This indicates the new model with both added random effects of state and time is a better fit.
 
-```{r}
+Now, we'll add in one more random effect, which is zip code. Once again, we will fit this model with an increased tolerance, compared to the default tolerance:
+
+```{r fit_var_4}
 fit_var_4 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
                      inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
                      (1|addr_state) + (1|earliest_cr_line) + (1|zip_code),
-                   data = extended_scaled, family = binomial,
+                   data = extended_scaled, family = "binomial",
                    control = glmerControl(check.conv.grad = .makeCC("warning", tol = 9e-3, relTol = NULL)))
 ```
 
 Now we can view this model summary:
 
-```{r}
+```{r summary_fit_var_4}
 summary(fit_var_4)
 ```
 
-Now, we'll try including just two random effects: earliest credit line (time), and then new location factor we created earlier, which combines states and zip codes in the form of state:zip.
+Now, we'll try including just two random effects: earliest credit line (time), and then the new location factor we created earlier, which nests zip codes within each state:
 
-```{r}
+```{r fit_var_5}
 fit_var_5 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
                      inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
                      (1|location) + (1|earliest_cr_line),
-                   data = extended_scaled, family = binomial,
+                   data = extended_scaled, family = "binomial",
                    control = glmerControl(optimizer = "Nelder_Mead",
                                           check.conv.grad = .makeCC("warning", tol = 8e-3, relTol = NULL)))
 ```
 
-Model summary:
+View model summary:
 
-```{r}
+```{r summary_fit_var_5}
 summary(fit_var_5)
 ```
 
@@ -914,6 +915,8 @@ knitr::kable(
 
 ## Odds Ratio Plot
 
+*** ...
+
 ```{r odds_ratio_plot_GLM}
 plot_data <- data.frame(
   Variable = rownames(model_results2),
@@ -933,13 +936,11 @@ ggplot(plot_data, aes(x = OddsRatio, xmin = LowerCI, xmax = UpperCI, y = Variabl
 
 ### Interpretations
 
-...
-
-Newly significant covariates, after controlling for location and time:
+Accounting for variation in time and location does have an impact on our model. In particular, accounting for this variation results in an addition of four newly significant covariates, which are all loan purpose categories:
 
 * purpose == debt_consolidation
 
-For loans with a stated purpose of debt_consolidation, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: [1.04-1.48], $p = 0.016010$), compared to the baseline.
+For loans with a stated purpose of debt consolidation, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: [1.04-1.48], $p = 0.016010$), compared to the baseline.
 
 * purpose == educational
 
@@ -951,15 +952,17 @@ For loans with a stated purpose of home improvement, the odds of "repay_fail" oc
 
 * purpose == renewable_energy
 
-For loans with a stated purpose of renewable_energy, the odds of "repay_fail" occurring increase by a factor of approximately 1.82% (95% CI: [1.00-3.28], $p = 0.0470893$), compared to the baseline.
+For loans with a stated purpose of renewable energy, the odds of "repay_fail" occurring increase by a factor of approximately 1.82% (95% CI: [1.00-3.28], $p = 0.0470893$), compared to the baseline.
+
+Beyond these differences, this extended model had the same general set of significant covariates and interactions, in the same directions, though the effect sizes and significance values may vary.
 
 ## Part 2 Discussion
 
-...
+*** ...
 
 # Conclusion
 
-...
+*** ...
 
 ## Caveats
 
