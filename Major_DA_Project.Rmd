@@ -680,6 +680,8 @@ We'll first take a look at the structure of the extended dataset.
 str(extended)
 ```
 
+## Data Preparation
+
 Next, we'll need to once again convert the relevant variables to factors. This time, this will include the new variables of zip_code, addr_state, and earliest_cr_line, in addition to the variables converted in the first part of this analysis:
 
 ```{r convert_vars_to_factors_ext}
@@ -702,6 +704,8 @@ nlevels(extended$location) # location includes zip nested within each state
 
 nlevels(extended$earliest_cr_line)
 ```
+
+## Variable Standardisation
 
 Once again, we need to standardise the numeric variables in the dataset:
 
@@ -821,7 +825,7 @@ fit_var_6 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
 *** EXPLAIN
 
 
-## Analyse Performance Benchmarks with Extended Model
+## Analyse Performance Benchmarks
 
 Analyse model with larger tolerance (all random effects separate):
 
@@ -860,9 +864,9 @@ hist(res$earliest_cr_line[,1])
 hist(res$location[,1])
 ```
 
-## Calculate odds ratio and CI for the final GLMM model
+## Calculate Odds Ratio and CIs
 
-Now, we will ...
+*** Now, we will ...
 
 ```{r odds_ratio_GLMM}
 summary_fit5 <- summary(fit_var_5)
@@ -906,7 +910,7 @@ knitr::kable(
 )
 ```
 
-## Odds ratio plot for the final model of GLMM
+## Odds Ratio Plot
 
 ```{r odds_ratio_plot_GLM}
 plot_data <- data.frame(
@@ -957,6 +961,7 @@ For a one-unit increase in the purpose renewable_energy, the odds of "repay_fail
 
 ## Caveats
 
+* Imbalance of repay_fail class: Many more cases of non-failure to repay, which might influence the model to favour that outcome
 * Extended model has a relatively high tolerance value, which could potentially be further reduced by tuning other model parameters
 * We have only included a subset of the possible variables which may help to predict loan default
 * We do not know the time frame of the data that is included, and it might be helpful to know this to ensure that we use recent data for model building and prediction tasks
