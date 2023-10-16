@@ -237,20 +237,6 @@ ggplot(train_data, aes(x = term, y = loan_amnt)) +
 
 The above plot consists of two side-by-side boxplots, one for each loan term category. Each boxplot provides information about the distribution of loan amounts for its respective term category. Based on the plot, we can see that, on average, loans with 60-month terms have higher loan amounts than those with 36-month terms, which is an expected behaviour. Also, we can observe some outliers in the 36-month terms, which indicates that there are a few loan amounts which are significantly higher than the typical range of loan amounts for this term category.
 
-*** KEEP OR REMOVE?? Output is huge, we have kept it commented out as it does not display well here.
-Now, we will create a plot that depicts the correlation between the different numeric variables; it includes both correlation coefficients and visuals of the distribution of each included variable.
-
-```{r ggpairs_plot}
-# create ggpairs plot with the specified columns
-ggpairs_plot <- ggpairs(train_data[, c("loan_amnt","int_rate", "annual_inc", "dti",
-                                      "delinq_2yrs", "inq_last_6mths", "open_acc",
-                                      "pub_rec", "revol_util", "revol_bal", "total_acc",
-                                      "credit_age_yrs")],
-                        progress = FALSE)
-
-#ggpairs_plot
-```
-
 Below, we create a correlation matrix of the numeric variables to help us understand the relationship between the different numeric variables.
 
 ```{r corr_matrix}
@@ -443,7 +429,7 @@ This model has the lowest AIC value we have received thus far, and this, as well
 summary(fit_logit)
 ```
 
-### Logit Model GOF
+### Logit Model Goodness of Fit
 
 Before we try to interpret this model's summary, we will first check the goodness-of-fit to determine whether this model is actually a good fit for the data.
 
@@ -674,6 +660,18 @@ Included above is a confusion matrix, which depicts our model's true and false p
 
 *** DISCUSS OVERALL FINDINGS
 
+Can you confirm if we can conclude as below?? I added some as an example:
+
+individuals with missing/unspecified employment lengths or unemployed individuals are more likely to repayment failure.
+
+The relationship between interest rate and loan repayment may differ depending on the term length, with the effect changing for longer-term loans.
+
+Loan with a 60-month loan term (longer term) are more likely to repayment failure.
+
+The specific loan purposes "medical," "moving," "other," and "small_business" are associated with a higher likelihood of loan repayment failure, and these effects are statistically significant. The effect of small business loan purpose is the most significant while "vacation" loans have a lesser degree of effect.
+
+Higher annual income ar less likely to repayment failure.
+ 
 # Extended Credit Risk Model
 
 Now, so far, we've been able to address management's concerns regarding the previous credit risk model and have presented a new model that performs much better. We are now going to address the second part of management's concerns, which includes using an extended version of the initial dataset. We will set out to answer whether accounting for variation in trends over jurisdiction or time changes or even improves performance benchmarks. Management has previously never considered whether credit risk changes between different states or over time, so we will investigate this.
@@ -917,7 +915,7 @@ knitr::kable(
 
 ## Odds Ratio Plot
 
-*** ...
+Odds ratio of repayment failure for GLMM model including confidence interval ranges compared to baseline: 36-month term, less than one year of employment, and loan purpose = car.
 
 ```{r odds_ratio_plot_GLM}
 plot_data <- data.frame(
