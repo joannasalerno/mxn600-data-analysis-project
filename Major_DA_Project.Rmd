@@ -216,7 +216,9 @@ for (var in numeric_vars) {
 }
 ```
 
-*** EXPLAIN
+We conducted an exploratory data analysis of our dataset, focusing on the numeric variables of interest. The above plots shows the distribution of these variables. This analysis revealed that several variables, namely 'annual_inc,' 'delinq_2yrs,' 'inq_last_6mths,' 'pub_rec,' and 'revol_bal,' exhibited significant outliers, which can potentially impact the integrity of our analysis.
+
+To address the presence of these outliers and to ensure the robustness of our subsequent statistical modeling, we have chosen to apply a scaling transformation to the numeric covariates in the dataset. The resulting scaled covariates will enable us to conduct our analysis with a dataset that has been preprocessed to reduce the undue impact of outliers.
 
 ```{r dist_plots_2}
 ggplot(train_data, aes(x = purpose)) +
