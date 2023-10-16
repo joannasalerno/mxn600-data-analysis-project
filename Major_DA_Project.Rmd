@@ -516,7 +516,7 @@ While the model fit with a probit link function has lower AIC than the model wit
 
 ## Cloglog Link Function
 
-Finally, we will test whether using a cloglog link function changes the AIC or predictive performance of our model.
+Finally, we will test whether using a complementary log-log link function changes the AIC or predictive performance of our model.
 
 ```{r fit_cloglog}
 fit_cloglog <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths +
@@ -582,7 +582,7 @@ Listed below are interpretations of the covariates of our final model:
 
 - The intercept or baseline refers to individuals who have been employed for less than one year, are seeking a car loan, and have a 36-month loan term when all other numeric predictors are equal to zero, and is statistically significant (95% CI: [0.08,0.13], $p < 2e-16$).
 
-- For a one-unit increase in the interest rate, the odds of "repay_fail" occurring increase by a factor of approximately 1.57 (95% CI: [1.48,1.67], $p < 2e-16$). This is a significant effect with a very low p-value.
+- For a one-unit increase in the interest rate, the odds of "repay_fail" occurring increase by a factor of approximately 1.57 (95% CI: [1.48,1.67], $p < 2e-16$).
 
 - For individuals with 1 to 10 plus years of employment, none of these employment lengths have a significant effect on the odds of "repay_fail" occurring compared to the reference category (less than one year). Their odds ratios are close to 1, and all $p > 0.05$, indicating that these employment lengths do not significantly impact the likelihood of loan repayment failure.
 
@@ -594,25 +594,25 @@ For individuals with missing/unspecified employment lengths or unemployed indivi
 
 For loans with a stated purpose of "medical", the odds of "repay_fail" occurring increase by a factor of approximately 1.83 (95% CI: [1.30-2.57], $p = 0.000502$), compared to the baseline (car).
 
-For loans with a stated purpose of "moving", the odds of "repay_fail" occurring increase by a factor of approximately 1.65 (95% CI: [1.15,2.36], $p = 0.006978$), compared to baseline  (car).
+For loans with a stated purpose of "moving", the odds of "repay_fail" occurring increase by a factor of approximately 1.65 (95% CI: [1.15,2.36], $p = 0.006978$), compared to baseline (car).
 
-For loans with a stated purpose of "other", the odds of "repay_fail" occurring increase by a factor of approximately 1.58 (95% CI: [1.24,2.00], $p = 0.000211$), compared to baseline  (car).
+For loans with a stated purpose of "other", the odds of "repay_fail" occurring increase by a factor of approximately 1.58 (95% CI: [1.24,2.00], $p = 0.000211$), compared to baseline (car).
 
-For loans with a stated purpose of "small business", the odds of "repay_fail" occurring increase by a factor of approximately 2.78 (95% CI: [2.15,3.59], $p = 5.80e-15$), compared to baseline  (car).
+For loans with a stated purpose of "small business", the odds of "repay_fail" occurring increase by a factor of approximately 2.78 (95% CI: [2.15,3.59], $p = 5.80e-15$), compared to baseline (car).
 
-For loans with a stated purpose of "vacation", the odds of "repay_fail" occurring increase by a factor of approximately 1.56 (95% CI: [1.01,2.43], $p = 0.047421$), compared to baseline  (car). 
+For loans with a stated purpose of "vacation", the odds of "repay_fail" occurring increase by a factor of approximately 1.56 (95% CI: [1.01,2.43], $p = 0.047421$), compared to baseline (car). 
 
-The specific loan purposes "medical," "moving," "other," and "small_business" are associated with a higher likelihood of loan repayment failure, and these effects are statistically significant. The effect of small business loan purpose is the most significant. "vacation" loans have a lesser degree of effect.
+As mentioned above, the specific loan purposes of "medical," "moving," "other," and "small_business" are all associated with a higher likelihood of loan repayment failure, as each had a statsitically significant effect with a $p < 0.05$.
  
-- For a one-unit increase in the number of inquiries in past 6 months, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: [1.20,1.28], $p < 2e-16$). This is a significant effect with a very low p-value.
+- For a one-unit increase in the number of inquiries in past 6 months, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: [1.20,1.28], $p < 2e-16$).
 
-- For a one-unit increase in the number of derogatory public records, the odds of "repay_fail" occurring increase by a factor of approximately 1.06 (95% CI: [1.03,1.10], $p = 0.000332$). 
+- For a one-unit increase in the number of derogatory public records, the odds of "repay_fail" occurring increase by a factor of approximately 1.06 (95% CI: [1.03,1.10], $p = 0.000332$).
 
 - For a one-unit increase in revolving balance, the odds of "repay_fail" occurring increase by a factor of approximately 1.10 (95% CI: [1.06,1.14], $p = 5.70e-06$).
 
 - For a one-unit increase in revolving credit utilization, the odds of "repay_fail" occurring increase by a factor of approximately 1.12 (95% CI: [1.07,1.18], $p = 4.05e-07$).
 
-- Having a 60-month loan term increases the odds of "repay_fail" occurring by a factor of approximately 1.67 (95% CI: [1.51,1.85], $p < 2e-16$), compared to the reference category (36 months loan term).
+- Having a 60-month loan term increases the odds of "repay_fail" occurring by a factor of approximately 1.67 (95% CI: [1.51,1.85], $p < 2e-16$), compared to the reference category (36-month loan term).
 
 - The negative estimate for the interaction between interest rate and the 60-month term suggests that the effect of interest rate on "repay_fail" is less severe for loans with a 60-month term compared to the reference category of the 36-month term. In other words, while interest rate still has a significant impact on loan repayment on its own, its impact differs for loans with longer terms.
 
@@ -658,23 +658,61 @@ Included above is a confusion matrix, which depicts our model's true and false p
 
 ## Part 1 Discussion
 
-*** DISCUSS OVERALL FINDINGS
+In summary, the goal of the first part of our analysis was to rebuild a credit risk model from the ground up. We began with an exploration of the available data, which made us aware of the rather large ranges of some of our numeric variables. Thus, we chose to standardise all of the numeric variables in the data so that they can be more easily and directly compared and that those variables with larger ranges would not be favoured by our model. We also converted the categorical variables within the data to factors to prepare for model building.
 
-Can you confirm if we can conclude as below?? I added some as an example:
+We conducted our own loan application and credit risk research, and the results of this, in conjunction with our exploratory analyses, ultimately led us to select an initial list of 16 variables: annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, revol_util, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs, pub_rec. We then decided to run stepwiseAIC to extract a good model formula from these variables. StepwiseAIC provided us with the following model formula:
 
-individuals with missing/unspecified employment lengths or unemployed individuals are more likely to repayment failure.
+repay_fail ~ term + int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util
 
-The relationship between interest rate and loan repayment may differ depending on the term length, with the effect changing for longer-term loans.
+We then wanted to consider whether interactions between any of the variables were important or improved the model. So, we tested a few interactions between some of the variables. However, we ultimately did not want our model to include too many interaction terms, so we opted to only keep the interaction between interest rate and loan term, as this made the most logical sense. An interest rate on its own does not mean much until it is combined with either a loan amount or a loan term. In this case, we chose to select loan term. This led us to our final model formula:
 
-Loan with a 60-month loan term (longer term) are more likely to repayment failure.
+repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate
 
-The specific loan purposes "medical," "moving," "other," and "small_business" are associated with a higher likelihood of loan repayment failure, and these effects are statistically significant. The effect of small business loan purpose is the most significant while "vacation" loans have a lesser degree of effect.
+We justified arriving at this model by conducting $\chi^2$-tests between different tested models to determine whether new models with different variables and interactions were significantly better at explaining the variable in the data. We then took a look at the goodness-of-fit of our selected model, and we were pleased to find that our model fit the data reasonably well. We produced residuals plots which did not indicate any deviations from normality, overdispersion, or outliers in the model residuals. In other words, these plots demonstrated that our model was a good fit for the data. We also compared the AIC values of our final chosen model with the other models we fit, and the chosen model has the lowest AIC value.
 
-Higher annual income ar less likely to repayment failure.
+Just to be sure, we also tested different link functions with the same final model formula. We tested both a probit and complementary log-log link function. The probit model, while demonstrating a lower AIC value than the initial logit model, did not do as well in terms of prediction. Ultimately, we want our model to not only fit the data well, but also to do a good job of predicting whether applicants will default or not. The complementary log-log model had a higher AIC value than the initial logit model, and we chose to not assess its predictive performance because of this. Thus, we ultimately selected the logit link function as the best link function for our final model.
+
+In terms of our final model's predictive performance, it does much better than the credit risk model the bank was previously using. While the previous models yielded a $Gini=0.114$ on the training dataset and a $Gini=0.110$ on the validation (unseen) dataset, our models produced a $Gini=0.410$ on the training dataset and a $Gini=0.395$ on the validation dataset.
+
+*** BRIEFLY EXPLAIN ROC AND GINI SCORES AND WHAT THEY MEAN
+
+Thus, in terms of answering the first question we set out to answer with our analysis (see below):
+
+1. How does this new model perform compared to the one used previously? How can it be expected to perform on new loan applications?
+
+We can say that our new model outperforms the one used previously. It does a relatively good job on new loan applications. As our confusion matrix demonstrated, out of 7,683 applicants included in the training dataset, 6,504 of them will not default and our model has accurately classified them as so, and 21 of them will default and have been accurately classified as so. However, our model falsely classified 1,138 applicants as defaulters and 20 applicants as non-defaulters. While there is still certainly room for improvement, this model is still performing much better than the previous model, so we have successfully addressed question 1.
+
+In terms of the second question of our analysis (see below):
+
+2. What are the important variables in this model and how do they compare to variables that are traditionally important for predicting credit risk in the banking sector?
+
+Our model summary demonstrated that the important (and in this case, important means that the variables demonstrated a significant effect on the risk of loan repayment) variables for predicting credit risk are as follows:
+
+*** ADD EFFECTS AND CIS AND P-VALUES TO BELOW LIST
+
+* Interest rate
+* Unspecified employment length (whether information is missing or the individual is unemployed)
+* Annual income
+* Loan purposes of medical, moving, small business, vacation or other
+* Number of inquiries in the last 6 months
+* Number of derogatory public records
+* Revolving balance and utilization
+* 60-month loan term
+* Interest rate * 60-month loan term
+
+Thus, only two of the important covariates in our model were associated with a significant decrease in the risk of credit default: annual income and the interaction between interest rate and the 60-month loan term. All other listed important covariates are associated with an increase in the risk of credit default (effect sizes and confidence intervals are presented in the list above).
+
+We found the relationship between interest rate and loan term on loan default to be interesting. While on their own, both interest rate and the 60-month loan term were associated with an increase in the odds that an applicant will fail to repay, the interaction between these two variables was associated with a decrease in the odds of repayment failure. This indicates that the relationship between interest rate and loan repayment may differ depending on the term length, with the effect changing for longer-term loans.
+
+We believe the important variables in our model generally make sense when considering the research we conducted on credit risk. For example, interest rate and loan term will impact an individual's ability to repay a loan, and factors that typically lower an individual's credit score include their revolving balance (available credit) and utilization (used credit). Furthermore, having a higher number of recent credit inquiries and derogatory public records decrease an individual's credit score. Annual income is another factor that is typically assessed when considering whether to approve an individual's loan application, as being able to demonstrate consistent, sufficient income (including information about employment), can impact the application decision.
+
+We were somewhat surprised by some of the significant loan purposes. We did not initially find much in the research that indicated the effect of loan purpose on application approval, but it does seem to make sense that expenses such as vacations, medical bills, particularly if medical expenses are ongoing and high, and small businesses, especially depending on the economy, might make it harder for an individual to repay a loan on time. Perhaps the purpose of other is associated with an increase in risk of repayment failure, as individuals do not necessarily demonstrate that the purpose is meant for the short term and temporary. Moving surprised us, but perhaps if moving expenses are so astronomical and individuals are moving a long distance and getting set up with new jobs in new cities, it may take a while to get back on their feet, thus potentially affecting their ability to repay on time during the transition period.
+
+Now, we will move on to the second part of our analysis.
  
 # Extended Credit Risk Model
 
-Now, so far, we've been able to address management's concerns regarding the previous credit risk model and have presented a new model that performs much better. We are now going to address the second part of management's concerns, which includes using an extended version of the initial dataset. We will set out to answer whether accounting for variation in trends over jurisdiction or time changes or even improves performance benchmarks. Management has previously never considered whether credit risk changes between different states or over time, so we will investigate this.
+So far, we've been able to address management's concerns regarding the previous credit risk model and have presented a new model that performs much better. We have also identified some of the important variables for predicting credit risk. We are now going to address the second part of management's concerns, which includes using an extended version of the initial dataset. We will set out to answer whether accounting for variation in trends over jurisdiction or time changes or even improves performance benchmarks. Management has previously never considered whether credit risk changes between different states or over time, so we will investigate this.
 
 We'll first take a look at the structure of the extended dataset.
 
@@ -795,6 +833,8 @@ View model summary:
 summary(fit_var_5)
 ```
 
+*** MIGHT NOT KEEP THIS? AS IT IS PREDICTION...
+
 ```{r extended_roc}
 par(mfrow = c(1, 2))
 # ROC curve on scaled extended data  for fit_var_4
@@ -814,23 +854,11 @@ Gini
 plot(g, main = "ROC Curve for fit_var_5")
 ```
 
-As the tolerance level for the above model was a bit high, we are now going to try to tune other paramaters to see if this allows for a lower tolerance.
-
-```{r}
-fit_var_6 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
-                     inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
-                     (1|addr_state) + (1|earliest_cr_line) + (1|zip_code),
-                   data = extended_scaled, family = binomial,
-                   control = glmerControl(optimizer = "Nelder_Mead", tolPwrss = 1e-3))
-```
-
-
-*** EXPLAIN
-
+*** EXPLAIN WHAT THE CHOSEN MODEL IS
 
 ## Analyse Performance Benchmarks
 
-Analyse model with larger tolerance (all random effects separate):
+Now, before we begin to interpret these extended models, we will first analyse performance benchmarks, or goodness-of-fit for the data. We'll start by looking at the model with all separate random effects (time, state, and zip code as random effects).
 
 ```{r gof_fit_var_4}
 # simulate residuals from the model:
@@ -840,7 +868,7 @@ res = simulateResiduals(fit_var_4)
 plot(res)
 ```
 
-Analyse model with random effects of (1) time and (2) zip code nested within state:
+As can be seen above, while this model does not indicate overdispersion of significant outliers, there appears to be significant deviation from normality, as seen by the significant KS test results on the left. Let's now consider the model with just 2 random effects: time and location, in which location consists of zip codes nested within states.
 
 ```{r gof_fit_var_5}
 # simulate residuals from the model:
@@ -850,7 +878,7 @@ res = simulateResiduals(fit_var_5)
 plot(res)
 ```
 
-Does the model fit the data well?
+As can be seen in the above plots, this model that includes location as a nested random effect of zip codes within states appears to be a better fit for the data. Now, there is no indication of significant deviations from normality, nor overdisperion or outliers. Thus, we will select this model to further analyse. Now we can look more into the residuals of the selected model.
 
 ```{r Goodness-of-fit}
 plot(residuals(fit_var_5),
@@ -867,9 +895,11 @@ hist(res$earliest_cr_line[,1])
 hist(res$location[,1])
 ```
 
+*** EXPLAIN ABOVE 2 PLOTS
+
 ## Calculate Odds Ratio and CIs
 
-*** Now, we will ...
+As the selected model was fit with a logit link function, we can exponentiate the estimates for easier interpretations of the significant effects. We will also calculate confidence intervals and present everything in a table for review.
 
 ```{r odds_ratio_GLMM}
 summary_fit5 <- summary(fit_var_5)
@@ -940,37 +970,68 @@ Accounting for variation in time and location does have an impact on our model. 
 
 * purpose == debt_consolidation
 
-For loans with a stated purpose of debt consolidation, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: [1.04-1.48], $p = 0.016010$), compared to the baseline.
+For loans with a stated purpose of debt consolidation, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: [1.04-1.48], $p = 0.016010$), compared to the baseline (car).
 
 * purpose == educational
 
-For loans with a stated purpose of education, the odds of "repay_fail" occurring increase by a factor of approximately 2.03 (95% CI: [1.50-2.76], $p = 0.0000068$), compared to the baseline.
+For loans with a stated purpose of education, the odds of "repay_fail" occurring increase by a factor of approximately 2.03 (95% CI: [1.50-2.76], $p = 0.0000068$), compared to the baseline (car).
 
 * purpose == home_improvement
 
-For loans with a stated purpose of home improvement, the odds of "repay_fail" occurring increase by a factor of approximately 1.23% (95% CI: [1.00-1.50], $p = 0.0479871$), compared to the baseline.
+For loans with a stated purpose of home improvement, the odds of "repay_fail" occurring increase by a factor of approximately 1.23% (95% CI: [1.00-1.50], $p = 0.0479871$), compared to the baseline (car).
 
 * purpose == renewable_energy
 
-For loans with a stated purpose of renewable energy, the odds of "repay_fail" occurring increase by a factor of approximately 1.82% (95% CI: [1.00-3.28], $p = 0.0470893$), compared to the baseline.
+For loans with a stated purpose of renewable energy, the odds of "repay_fail" occurring increase by a factor of approximately 1.82% (95% CI: [1.00-3.28], $p = 0.0470893$), compared to the baseline (car).
 
 Beyond these differences, this extended model had the same general set of significant covariates and interactions, in the same directions, though the effect sizes and significance values may vary.
 
-Random Effects Interpretation:
+In terms of the selected model's random effects:
 
 location: The location random effect captures the variation in the response variable that is associated with different locations. The estimated standard deviation for the location random effect is approximately 0.2261. The estimated variance (0.05114) express the degree of variation between different locations, while the standard deviation provides a measure of this variation.
 
 earliest_cr_line: The earliest_cr_line random effect captures the variation in the response variable associated with the year of an individual's earliest credit line. The estimated standard deviation for the earliest_cr_line random effect is approximately 0.1189. The estimated variance (0.01414) represents the degree of variation between different earliest credit lines, and the standard deviation (0.1189) express the magnitude of this variation.
 
-Overall, the inclusion of random variable enhances the understanding of underlying variability in the response variable (repay_fail) and improve its overall predictive performance.
+Overall, the inclusion of random effects seems to enhance the understanding of underlying variability in the response variable (repay_fail).
 
 ## Part 2 Discussion
 
-*** ...
+In summary, the main goal of this second part of our analysis was to account for variations in location and time to determine whether this improves our model's performance benchmarks.
+
+Specifically, below are the three questions we set out to answer in part 2:
+
+3. Can accounting for this variation (e.g., state/zip-code and time) improve performance benchmarks?
+4. Are there any surprising differences in variables that are important for predicting credit risk?
+5. Does credit risk change over time or between states? This is not something the bank has previously
+investigated and results may inform modified loan policies in the future.
+
+*** ANSWER Q1
+
+In terms of the second question (question 4 in the list), we were a bit surprised by the inclusion of 4 more significant covariates in our model, after accounting for this variation:
+
+*** ADD EFFECTS, CIS, P-VALUES BELOW
+
+* Debt consolidation
+* Educational
+* Home improvement
+* Renewable energy
+
+Once again, all 4 were associated with an increased risk of repayment failure. Thus, we are starting to come to the conclusion that loan purpose, in general, often increases an individual's risk of not repaying their loan. Perhaps then, it is other variables, such as income, that can help to offset this risk so that individuals with the above mentioned significant loan purposes may be approved for credit applications. In other words, as far as the bank is concerned, when assessing loan applications, other variables beyond stated loan purpose may need to be present, otherwise, such individuals may be viewed as too risky for loan application approval.
+
+*** Finally, for the last question (question 5), ANSWER...
 
 # Conclusion
 
-*** ...
+*** WRITE FINAL THOUGHTS/SUMMARIES
+
+Review of questions guiding this analysis:
+
+1. How does this new model perform compared to the one used previously? How can it be expected to perform on new loan applications?
+2. What are the important variables in this model and how do they compare to variables that are traditionally important for predicting credit risk in the banking sector?
+3. Can accounting for this variation (e.g., state/zip-code and time) improve performance benchmarks?
+4. Are there any surprising differences in variables that are important for predicting credit risk?
+5. Does credit risk change over time or between states? This is not something the bank has previously
+investigated and results may inform modified loan policies in the future.
 
 ## Caveats
 
