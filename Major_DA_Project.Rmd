@@ -956,6 +956,14 @@ For loans with a stated purpose of renewable energy, the odds of "repay_fail" oc
 
 Beyond these differences, this extended model had the same general set of significant covariates and interactions, in the same directions, though the effect sizes and significance values may vary.
 
+Random Effects Interpretation:
+
+location: The location random effect captures the variation in the response variable that is associated with different locations. The estimated standard deviation for the location random effect is approximately 0.2261. The estimated variance (0.05114) express the degree of variation between different locations, while the standard deviation provides a measure of this variation.
+
+earliest_cr_line: The earliest_cr_line random effect captures the variation in the response variable associated with the year of an individual's earliest credit line. The estimated standard deviation for the earliest_cr_line random effect is approximately 0.1189. The estimated variance (0.01414) represents the degree of variation between different earliest credit lines, and the standard deviation (0.1189) express the magnitude of this variation.
+
+Overall, the inclusion of random variable enhances the understanding of underlying variability in the response variable (repay_fail) and improve its overall predictive performance.
+
 ## Part 2 Discussion
 
 *** ...
