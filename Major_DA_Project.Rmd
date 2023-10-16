@@ -596,33 +596,35 @@ Listed below are interpretations of the covariates of our final model:
 
 - The intercept or baseline refers to individuals who have been employed for less than one year, are seeking a car loan, and have a 36-month loan term when all other numeric predictors are equal to zero, and is statistically significant (95% CI: [0.08,0.13], $p < 2e-16$).
 
-- For a one-unit increase in the interest rate, the odds of "repay_fail" occurring increase by a factor of approximately 1.57 (95% CI: [1.48,1.67], $p < 2e-16$), compared to baseline.
+- For a one-unit increase in the interest rate, the odds of "repay_fail" occurring increase by a factor of approximately 1.57 (95% CI: [1.48,1.67], $p < 2e-16$). This is a significant effect with a very low p-value.
 
 - For individuals with 1 to 10 plus years of employment, none of these employment lengths have a significant effect on the odds of "repay_fail" occurring compared to the reference category (less than one year). Their odds ratios are close to 1, and all $p > 0.05$, indicating that these employment lengths do not significantly impact the likelihood of loan repayment failure.
 
-For individuals with missing/unspecified employment lengths or unemployed individuals ("n/a"), the odds of "repay_fail" occurring increase by a factor of approximately 1.73 (95% CI: [1.37,2.19], $p = 4.11e-06$), compared to baseline. This indicates that the absence of employment length information is associated with a higher likelihood of loan repayment failure.
+For individuals with missing/unspecified employment lengths or unemployed individuals ("n/a"), the odds of "repay_fail" occurring increase by a factor of approximately 1.73 (95% CI: [1.37,2.19], $p = 4.11e-06$), compared to baseline (less than one year). This indicates that the absence of employment length information is associated with a higher likelihood of loan repayment failure.
 
-- For a one-unit increase in annual income, the odds of "repay_fail" occurring decrease by a factor of approximately 0.71 (95% CI: [0.67,0.75], $p < 2e-16$), compared to baseline.
+- For a one-unit increase in annual income, the odds of "repay_fail" occurring decrease by a factor of approximately 0.71 (95% CI: [0.67,0.75], $p < 2e-16$).
 
 - For loans with a stated purpose of "credit card", "debt consolidation", "educational", "home improvement", "house", "major purchase", "renewable energy", and "wedding", there is no significant effect on the odds of "repay_fail" occurring compared to the reference category (car). As all $p > 0.05$, these loan purposes do not significantly impact the likelihood of loan repayment failure.
 
-For loans with a stated purpose of "medical", the odds of "repay_fail" occurring increase by a factor of approximately 1.83 (95% CI: [1.30-2.57], $p = 0.000502$), compared to the baseline.
+For loans with a stated purpose of "medical", the odds of "repay_fail" occurring increase by a factor of approximately 1.83 (95% CI: [1.30-2.57], $p = 0.000502$), compared to the baseline (car).
 
-For loans with a stated purpose of "moving", the odds of "repay_fail" occurring increase by a factor of approximately 1.65 (95% CI: [1.15,2.36], $p = 0.006978$), compared to baseline.
+For loans with a stated purpose of "moving", the odds of "repay_fail" occurring increase by a factor of approximately 1.65 (95% CI: [1.15,2.36], $p = 0.006978$), compared to baseline  (car).
 
-For loans with a stated purpose of "other", the odds of "repay_fail" occurring increase by a factor of approximately 1.58 (95% CI: [1.24,2.00], $p = 0.000211$), compared to baseline.
+For loans with a stated purpose of "other", the odds of "repay_fail" occurring increase by a factor of approximately 1.58 (95% CI: [1.24,2.00], $p = 0.000211$), compared to baseline  (car).
 
-For loans with a stated purpose of "small business", the odds of "repay_fail" occurring increase by a factor of approximately 2.78 (95% CI: [2.15,3.59], $p = 5.80e-15$), compared to baseline.
+For loans with a stated purpose of "small business", the odds of "repay_fail" occurring increase by a factor of approximately 2.78 (95% CI: [2.15,3.59], $p = 5.80e-15$), compared to baseline  (car).
 
-For loans with a stated purpose of "vacation", the odds of "repay_fail" occurring increase by a factor of approximately 1.56 (95% CI: [1.01,2.43], $p = 0.047421$), compared to baseline. 
+For loans with a stated purpose of "vacation", the odds of "repay_fail" occurring increase by a factor of approximately 1.56 (95% CI: [1.01,2.43], $p = 0.047421$), compared to baseline  (car). 
+
+The specific loan purposes "medical," "moving," "other," and "small_business" are associated with a higher likelihood of loan repayment failure, and these effects are statistically significant. The effect of small business loan purpose is the most significant. "vacation" loans have a lesser degree of effect.
  
-- For a one-unit increase in the number of inquiries in past 6 months, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: [1.20,1.28], $p < 2e-16$), compared to baseline.
+- For a one-unit increase in the number of inquiries in past 6 months, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: [1.20,1.28], $p < 2e-16$). This is a significant effect with a very low p-value.
 
-- For a one-unit increase in the number of derogatory public records, the odds of "repay_fail" occurring increase by a factor of approximately 1.06 (95% CI: [1.03,1.10], $p = 0.000332$), compared to baseline. 
+- For a one-unit increase in the number of derogatory public records, the odds of "repay_fail" occurring increase by a factor of approximately 1.06 (95% CI: [1.03,1.10], $p = 0.000332$). 
 
-- For a one-unit increase in revolving balance, the odds of "repay_fail" occurring increase by a factor of approximately 1.10 (95% CI: [1.06,1.14], $p = 5.70e-06$), compared to baseline.
+- For a one-unit increase in revolving balance, the odds of "repay_fail" occurring increase by a factor of approximately 1.10 (95% CI: [1.06,1.14], $p = 5.70e-06$).
 
-- For a one-unit increase in revolving credit utilization, the odds of "repay_fail" occurring increase by a factor of approximately 1.12 (95% CI: [1.07,1.18], $p = 4.05e-07$), compared to baseline.
+- For a one-unit increase in revolving credit utilization, the odds of "repay_fail" occurring increase by a factor of approximately 1.12 (95% CI: [1.07,1.18], $p = 4.05e-07$).
 
 - Having a 60-month loan term increases the odds of "repay_fail" occurring by a factor of approximately 1.67 (95% CI: [1.51,1.85], $p < 2e-16$), compared to the reference category (36 months loan term).
 
