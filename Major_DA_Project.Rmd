@@ -616,7 +616,7 @@ As mentioned above, the specific loan purposes of "medical," "moving," "other," 
 
 - The negative estimate for the interaction between interest rate and the 60-month term suggests that the effect of interest rate on "repay_fail" is less severe for loans with a 60-month term compared to the reference category of the 36-month term. In other words, while interest rate still has a significant impact on loan repayment on its own, its impact differs for loans with longer terms.
 
-The interaction between interest rate and the 60-month loan term decreases the odds of "repay_fail" by a factor of approximately 0.90 (95% CI: [0.82,0.98], $p = 013086$), compared to baseline. The relationship between interest rate and loan repayment may differ depending on the term length, with the effect changing for longer-term loans.
+The interaction between interest rate and the 60-month loan term decreases the odds of "repay_fail" by a factor of approximately 0.90 (95% CI: [0.82,0.98], $p = 0.013086$), compared to baseline. The relationship between interest rate and loan repayment may differ depending on the term length, with the effect changing for longer-term loans.
 
 ## Odds Ratio Plot with CIs
 
