@@ -418,7 +418,7 @@ Next, we will fit a model using the logit link function, with our final list of 
 ```{r fit_logit}
 fit_logit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + 
                    inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
-                 data = train_scaled_data, family = binomial)
+                 data = train_scaled_data, family = "binomial")
 
 AIC(fit_logit)
 ```
@@ -431,40 +431,62 @@ summary(fit_logit)
 
 ### Logit Model Goodness of Fit
 
-Before we try to interpret this model's summary, we will first check the goodness-of-fit to determine whether this model is actually a good fit for the data.
+Before we try to interpret this model's summary, we will first check the goodness-of-fit to determine whether this model is actually a good fit for the data. We will first look at the goodness-of-fit for "seen" data (using the training dataset).
 
-```{r fit_logit_resid}
+```{r fit_logit_resid_seen}
 # simulate residuals from the model:
-res = simulateResiduals(fit_logit)
+res_logit_seen = simulateResiduals(fit_logit)
 
 # plot observed quantile versus expected quantile to assess distribution fit, and
 # predicted value versus standardised residuals for unmodelled pattern in the residuals
-plot(res)
+plot(res_logit_seen)
 ```
 
 The above DHARMA residuals plots shows no sign of overdispersion. The distribution test (KS), dispersion test, and outlier test all are non-significant, which means there is evidence to suggest that the distribution of the simulated quantiles follows a uniform distribution. Additionally, in the second plot, the quantiles of the residuals (red lines) show a uniform pattern for predicted values.
 
-### Logit Model: Predictive Performance
+Now, we will use the test dataset, or "unseen" data, to assess whether this model is still a good fit for unseen data.
 
-Next, we will analyse the predictive performance of our logit model. After all, this is one of the main reasons we've been tasked with conducting this analysis.
+```{r fit_logit_resid_unseen}
+# first fit the model on unseen data (test dataset)
+fit_logit_unseen <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + 
+                          inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate,
+                        data = test_scaled_data, family = "binomial")
+
+# simulate residuals from the model:
+res_logit_unseen = simulateResiduals(fit_logit_unseen)
+
+# plot observed quantile versus expected quantile to assess distribution fit, and
+# predicted value versus standardised residuals for unmodelled pattern in the residuals
+plot(res_logit_unseen)
+```
+
+As can be seen in the above residuals plots, once again, this model appears to be a good fit for the data. The QQ plot of residuals does not indicate any deviations from normality, overdispersion, or outliers in the residuals. In other words, it appears that this model is also a reasonable fit for unseen data, which helps us to validate that our model is appropriate.
+
+### Logit Model: Performance
+
+Next, we will analyse the performance of our logit model, including for prediction. After all, this is one of the main reasons we've been tasked with conducting this analysis.
+
+We will first analyse the model's performance on "seen" data:
 
 Training dataset ROC:
 ```{r train_roc}
 # ROC curve on scaled train data 
-prob=predict(fit_logit,type=c("response"))
-g <- roc(train_scaled_data$repay_fail ~ prob)
+prob_logit_train=predict(fit_logit,type=c("response"))
+g <- roc(train_scaled_data$repay_fail ~ prob_logit_train)
 AUC <- g$auc
 AUC
 Gini <- 2*(AUC - 1/2)
 Gini
 plot(g)
 ```
+
+Now, we will assess this model's predictive performance on "unseen" data. In other words, we'll assess how well this model performs on predicting credit risk for new applicants.
 
 Validation dataset ROC:
 ```{r val_roc}
 # ROC curve on scaled validation data
-prob=predict(fit_logit,newdata=val_scaled_data,type=c("response"))
-g <- roc(val_scaled_data$repay_fail ~ prob)
+prob_logit_val=predict(fit_logit,newdata=val_scaled_data,type=c("response"))
+g <- roc(val_scaled_data$repay_fail ~ prob_logit_val)
 AUC <- g$auc
 AUC
 Gini <- 2*(AUC - 1/2)
@@ -472,11 +494,11 @@ Gini
 plot(g)
 ```
 
-The Gini score for the fitted logistic regression model is 0.410 on the training dataset and 0.395 on the validation dataset. Both of these scores are higher than those of the old model ($Gini=0.114$ for train, $Gini=0.110$ for validation). Additionally, the ROC curve for the new model is positioned closer to the top-left corner compared to the old model. These findings collectively indicate that the new model is better than the old one at predicting whether loan applicants will default.
+For "seen" data, our model has a $Gini=0.410$, which is much higher than that of the old model ($Gini=0.114$). For "unseen" data (using the validation dataset), our model has a $Gini=0.395$, which is also much higher than that of the old model ($Gini=0.110$). Additionally, the ROC curves for the new model on both seen and unseen data are positioned closer to the top-left corners compared to the old model. These findings collectively indicate that the new model is not only performing better than the old model on seen data, but also has better predictive performance to predict credit risk on unseen data for new applicants.
 
 ## Probit Link Function
 
-We will now test whether using a probit link function changes the AIC or predictive performance of our model.
+Though we are quite happy with the above selected model (with a logit link function), we will now test whether using a probit link function changes the AIC or performance of our model.
 
 ```{r fit_probit}
 fit_probit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths +
@@ -486,13 +508,28 @@ fit_probit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + in
 AIC(fit_probit)
 ```
 
-### Probit Model: Predictive Performance
+Review probit model goodness-of-fit:
+
+```{r fit_probit_resid}
+# simulate residuals from the model:
+res_probit = simulateResiduals(fit_probit)
+
+# plot observed quantile versus expected quantile to assess distribution fit, and
+# predicted value versus standardised residuals for unmodelled pattern in the residuals
+plot(res_probit)
+```
+
+As can be seen above, the model fit using the probit link function also appears to be a good fit for the data in that it does not indicate any deviations from normality, overdispersion, or outliers in the residuals.
+
+### Probit Model: Performance
+
+Now, we will assess the performance of the model fit using the probit link function for comparison against the logit link function model.
 
 Training dataset:
 ```{r probit_train_roc}
 # Probit model: ROC curve on scaled train data 
-prob_train=predict(fit_probit,type=c("response"))
-g <- roc(train_scaled_data$repay_fail ~ prob_train)
+prob_probit_train=predict(fit_probit,type=c("response"))
+g <- roc(train_scaled_data$repay_fail ~ prob_probit_train)
 AUC <- g$auc
 AUC
 Gini <- 2*(AUC - 1/2)
@@ -503,8 +540,8 @@ plot(g)
 Validation dataset:
 ```{r probit_val_roc}
 # Probit model: ROC curve on scaled validation data 
-prob_val=predict(fit_probit,newdata = val_scaled_data,type=c("response"))
-g <- roc(val_scaled_data$repay_fail ~ prob_val)
+prob_probit_val=predict(fit_probit,newdata = val_scaled_data,type=c("response"))
+g <- roc(val_scaled_data$repay_fail ~ prob_probit_val)
 AUC <- g$auc
 AUC
 Gini <- 2*(AUC - 1/2)
@@ -512,11 +549,11 @@ Gini
 plot(g)
 ```
 
-While the model fit with a probit link function has lower AIC than the model with a logit link function, the probit model has a slightly lower Gini score on the validation set. We'll consider the logit model as better than the probit model.
+While the model fit with a probit link function has lower AIC than the model with a logit link function and similarly demonstrates goodness-of-fit for the data, the probit model has a slightly lower Gini score on the validation dataset. Thus, we'll consider the logit model as better than the probit model.
 
 ## Cloglog Link Function
 
-Finally, we will test whether using a complementary log-log link function changes the AIC or predictive performance of our model.
+Finally, we will test whether using a complementary log-log link function changes the AIC or performance of our model.
 
 ```{r fit_cloglog}
 fit_cloglog <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths +
@@ -526,9 +563,20 @@ fit_cloglog <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + i
 AIC(fit_cloglog)
 ```
 
-As can be seen above, the model fit with the cloglog link function has a higher AIC than both the logit and probit models.
+Review cloglog model goodness-of-fit:
 
-Based on the comparisons conducted between the three different link functions for our GLM model, we will choose to use the model with the logit link function as our final model. This model demonstrated the best combination of AIC value and predictive performance compared to the other models.
+```{r fit_cloglog_resid}
+# simulate residuals from the model:
+res_cloglog = simulateResiduals(fit_cloglog)
+
+# plot observed quantile versus expected quantile to assess distribution fit, and
+# predicted value versus standardised residuals for unmodelled pattern in the residuals
+plot(res_cloglog)
+```
+
+As can be seen above, the model fit with the cloglog link function appears to be a good fit for the data, as there is no indication of non-normality, overdispersion, or outliers in the residuals. However, the cloglog model has a higher AIC than both the logit and probit models. Thus, we will not assess this model any further.
+
+Based on the comparisons conducted between the three different link functions for our GLM model, we will choose to use the model with the logit link function as our final model. This model demonstrated the best combination of AIC value and performance, including predictive performance, compared to the other models.
 
 ## Calculate Odds Ratio and CI
 
@@ -644,17 +692,17 @@ Odds ratio of repayment failure for GLM model including confidence interval rang
 Finally, we will create a confusion matrix to demonstrate our final model's performance of classifying whether applicants will default on their payments or not.
 
 ```{r accuracy_confmatrix_GLM}
-confusion_glm <- ifelse(prob_val > 0.5, "1", "0")
+confusion_glm <- ifelse(prob_logit_val > 0.5, "1", "0")
 confusion_glm <- as.factor(confusion_glm)
 
 require(caret)
 cm <- confusionMatrix(data=confusion_glm,
-                    reference=val_scaled_data$repay_fail,
-                    positive="1")
+                      reference=val_scaled_data$repay_fail,
+                      positive="1")
 cm
 ```
 
-Included above is a confusion matrix, which depicts our model's true and false positive/negative rates. This can be used to better understand how well the model can predict new credit applications in terms of how accurately it classifies new applicants. The confusion matrix shows that out of 7,683 applicants, 6,504 of them will not default and have been accurately classified as so, and 21 of them will default and have been accurately classified as so. However, using our model, 1,138 applicants are falsely classified as defaulters when in fact, they would not have defaulted, and 20 applicants are falsely classified as not defaulting, when they are actually defaulters. 
+Included above is a confusion matrix, which depicts our model's true and false positive/negative rates when predicting on unseen (validation) data. This can be used to better understand how well the model predicts new credit applications in terms of how accurately it classifies new applicants. The confusion matrix shows that out of 7,683 applicants, 6,497 of them will not default and have been accurately classified as so, and 28 of them will default and have been accurately classified as so. However, using our model, 1,131 applicants are falsely classified as non-defaulters when in fact, they will default, and 27 applicants are falsely classified as defaulters when they will not default. 
 
 ## Part 1 Discussion
 
@@ -672,9 +720,9 @@ We justified arriving at this model by conducting $\chi^2$-tests between differe
 
 Just to be sure, we also tested different link functions with the same final model formula. We tested both a probit and complementary log-log link function. The probit model, while demonstrating a lower AIC value than the initial logit model, did not do as well in terms of prediction. Ultimately, we want our model to not only fit the data well, but also to do a good job of predicting whether applicants will default or not. The complementary log-log model had a higher AIC value than the initial logit model, and we chose to not assess its predictive performance because of this. Thus, we ultimately selected the logit link function as the best link function for our final model.
 
-In terms of our final model's predictive performance, it does much better than the credit risk model the bank was previously using. While the previous models yielded a $Gini=0.114$ on the training dataset and a $Gini=0.110$ on the validation (unseen) dataset, our models produced a $Gini=0.410$ on the training dataset and a $Gini=0.395$ on the validation dataset.
-
 *** BRIEFLY EXPLAIN ROC AND GINI SCORES AND WHAT THEY MEAN
+
+In terms of our final model's performance, it does much better than the credit risk model the bank was previously using. While the previous models yielded a $Gini=0.114$ on the training (seen) dataset and a $Gini=0.110$ on the validation (unseen) dataset, our models produced a $Gini=0.410$ on the training dataset and a $Gini=0.395$ on the validation dataset. This demonstrates that our model both performs well on seen data and also demonstrates good predictive performance on new, unseen data.
 
 Thus, in terms of answering the first question we set out to answer with our analysis (see below):
 
@@ -687,8 +735,6 @@ In terms of the second question of our analysis (see below):
 2. What are the important variables in this model and how do they compare to variables that are traditionally important for predicting credit risk in the banking sector?
 
 Our model summary demonstrated that the important (and in this case, important means that the variables demonstrated a significant effect on the risk of loan repayment) variables for predicting credit risk are as follows:
-
-*** ADD EFFECTS AND CIS AND P-VALUES TO BELOW LIST
 
 * Interest rate
 * Unspecified employment length (whether information is missing or the individual is unemployed)
@@ -833,24 +879,6 @@ View model summary:
 summary(fit_var_5)
 ```
 
-
-## Performance 
-
-```{r extended_roc}
-# ROC curve on scaled extended data  for fit_var_5
-prob_ext=predict(fit_var_5,type=c("response"))
-g <- roc(extended_scaled$repay_fail ~ prob_ext)
-AUC <- g$auc
-Gini <- 2*(AUC - 1/2)
-Gini
-plot(g, main = "Extended Model ROC Curve")
-```
-
-
-
-
-*** EXPLAIN WHAT THE CHOSEN MODEL IS
-
 ## Analyse Performance Benchmarks
 
 Now, before we begin to interpret these extended models, we will first analyse performance benchmarks, or goodness-of-fit for the data. We'll start by looking at the model with all separate random effects (time, state, and zip code as random effects).
@@ -891,6 +919,21 @@ hist(res$location[,1])
 ```
 
 *** EXPLAIN ABOVE 2 PLOTS
+
+Now, we can assess the performance benchmarks of the chosen extended model and compare these to the final model we obtained in the first part of this analysis. We begin by creating a ROC curve and computing a Gini score for the extended model.
+
+```{r extended_roc}
+# ROC curve on scaled extended data for fit_var_5
+prob_ext=predict(fit_var_5,type=c("response"))
+g <- roc(extended_scaled$repay_fail ~ prob_ext)
+AUC <- g$auc
+Gini <- 2*(AUC - 1/2)
+AUC
+Gini
+plot(g, main = "Extended Model ROC Curve")
+```
+
+As can be seen in the above plot, the extended model has a $AUC=0.7183$ and $Gini=0.437$. This is an improved score from that of the model from the first part of our analysis, which had a $AUC=0.7052$ and $Gini=0.410$. It is important to note that for the above plot, we were only able to assess the performance of our model using "seen" data. Thus, the metrics we are comparing from the part 1 model are also those obtained using "seen" data (called training dataset). Based on our obtained AUC and Gini scores, we can say that our extended model does result in improved performance benchmarks, as this model is better able to predict loan repayment failure. In other words, accounting for variations in time and location improves our model's ability to predict whether applicants will default on their loans or not.
 
 ## Calculate Odds Ratio and CIs
 
@@ -964,11 +1007,13 @@ confusion_glmm <- ifelse(prob_ext > 0.5, "1", "0")
 confusion_glmm <- as.factor(confusion_glmm)
 
 require(caret)
-cm <- confusionMatrix(data=confusion_glmm,
-                    reference=extended_scaled$repay_fail,
-                    positive="1")
-cm
+cm_glmm <- confusionMatrix(data=confusion_glmm,
+                           reference=extended_scaled$repay_fail,
+                           positive="1")
+cm_glmm
 ```
+
+*** INTERPRET ABOVE
 
 ### Interpretations
 
