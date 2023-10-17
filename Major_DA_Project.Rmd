@@ -491,8 +491,8 @@ AIC(fit_probit)
 Training dataset:
 ```{r probit_train_roc}
 # Probit model: ROC curve on scaled train data 
-prob=predict(fit_probit,type=c("response"))
-g <- roc(train_scaled_data$repay_fail ~ prob)
+prob_train=predict(fit_probit,type=c("response"))
+g <- roc(train_scaled_data$repay_fail ~ prob_train)
 AUC <- g$auc
 AUC
 Gini <- 2*(AUC - 1/2)
@@ -503,8 +503,8 @@ plot(g)
 Validation dataset:
 ```{r probit_val_roc}
 # Probit model: ROC curve on scaled validation data 
-prob=predict(fit_probit,newdata = val_scaled_data,type=c("response"))
-g <- roc(val_scaled_data$repay_fail ~ prob)
+prob_val=predict(fit_probit,newdata = val_scaled_data,type=c("response"))
+g <- roc(val_scaled_data$repay_fail ~ prob_val)
 AUC <- g$auc
 AUC
 Gini <- 2*(AUC - 1/2)
@@ -644,11 +644,11 @@ Odds ratio of repayment failure for GLM model including confidence interval rang
 Finally, we will create a confusion matrix to demonstrate our final model's performance of classifying whether applicants will default on their payments or not.
 
 ```{r accuracy_confmatrix_GLM}
-fit_logit <- ifelse(prob > 0.5, "1", "0")
-fit_logit <- as.factor(fit_logit)
+confusion_glm <- ifelse(prob_val > 0.5, "1", "0")
+confusion_glm <- as.factor(confusion_glm)
 
 require(caret)
-cm <- confusionMatrix(data=fit_logit,
+cm <- confusionMatrix(data=confusion_glm,
                     reference=val_scaled_data$repay_fail,
                     positive="1")
 cm
@@ -833,25 +833,17 @@ View model summary:
 summary(fit_var_5)
 ```
 
-*** MIGHT NOT KEEP THIS? AS IT IS PREDICTION...
+
+## Performance 
 
 ```{r extended_roc}
-par(mfrow = c(1, 2))
-# ROC curve on scaled extended data  for fit_var_4
-prob=predict(fit_var_4,type=c("response"))
-g <- roc(extended_scaled$repay_fail ~ prob)
-AUC <- g$auc
-Gini <- 2*(AUC - 1/2)
-Gini
-plot(g, main = "ROC Curve for fit_var_4")
-
 # ROC curve on scaled extended data  for fit_var_5
-prob=predict(fit_var_5,type=c("response"))
-g <- roc(extended_scaled$repay_fail ~ prob)
+prob_ext=predict(fit_var_5,type=c("response"))
+g <- roc(extended_scaled$repay_fail ~ prob_ext)
 AUC <- g$auc
 Gini <- 2*(AUC - 1/2)
 Gini
-plot(g, main = "ROC Curve for fit_var_5")
+plot(g, main = "Extended Model ROC Curve")
 ```
 
 
@@ -968,11 +960,11 @@ ggplot(plot_data, aes(x = OddsRatio, xmin = LowerCI, xmax = UpperCI, y = Variabl
 ```
 
 ```{r accuracy_confmatrix_GLMM}
-fit_var_5 <- ifelse(prob > 0.5, "1", "0")
-fit_var_5 <- as.factor(fit_var_5)
+confusion_glmm <- ifelse(prob_ext > 0.5, "1", "0")
+confusion_glmm <- as.factor(confusion_glmm)
 
 require(caret)
-cm <- confusionMatrix(data=fit_var_5,
+cm <- confusionMatrix(data=confusion_glmm,
                     reference=extended_scaled$repay_fail,
                     positive="1")
 cm
