@@ -650,7 +650,7 @@ For loans with a stated purpose of "small business", the odds of "repay_fail" oc
 
 For loans with a stated purpose of "vacation", the odds of "repay_fail" occurring increase by a factor of approximately 1.56 (95% CI: [1.01,2.43], $p = 0.047421$), compared to baseline (car). 
 
-As mentioned above, the specific loan purposes of "medical," "moving," "other," and "small_business" are all associated with a higher likelihood of loan repayment failure, as each had a statistically significant effect with a $p < 0.05$. The effect of small business loan purposes is the most significant with the smallest p-value, while vacation loan purposes have a lesser degree of effect.
+As mentioned above, the specific loan purposes of "medical," "moving," "other," "small_business", and "vacation" are all associated with a higher likelihood of loan repayment failure, as each had a statistically significant effect with a $p < 0.05$. The effect of small business loan purposes is the most significant with the smallest p-value, while vacation loan purposes have a lesser degree of effect.
  
 - For a one-unit increase in the number of inquiries in past 6 months, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: [1.20,1.28], $p < 2e-16$). As can be seen by the low p-value, this is a very significant effect.
 
