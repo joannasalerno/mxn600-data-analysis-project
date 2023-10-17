@@ -879,48 +879,33 @@ View model summary:
 summary(fit_var_5)
 ```
 
-## Analyse Performance Benchmarks
+## Goodness-of-Fit
 
-Now, before we begin to interpret these extended models, we will first analyse performance benchmarks, or goodness-of-fit for the data. We'll start by looking at the model with all separate random effects (time, state, and zip code as random effects).
+Now, before we begin to interpret these extended models and analyse their performance benchmarks, we will first analyse the goodness-of-fit of the model which has all 3 variables as random effects (time, state, and zip code) and for the model which has 2 variables as random effects (time and location, which consists of zip codes nested within states). We'll begin with the former model.
 
 ```{r gof_fit_var_4}
 # simulate residuals from the model:
-res = simulateResiduals(fit_var_4)
+res_fit_var_4 = simulateResiduals(fit_var_4)
 
 # plot observed quantile versus expected quantile to assess distribution fit, and predicted value versus standardised residuals for unmodelled pattern in the residuals
-plot(res)
+plot(res_fit_var_4)
 ```
 
-As can be seen above, while this model does not indicate overdispersion of significant outliers, there appears to be significant deviation from normality, as seen by the significant KS test results on the left. Let's now consider the model with just 2 random effects: time and location, in which location consists of zip codes nested within states.
+As can be seen above, while this model does not indicate overdispersion or significant outliers in the residuals, there appears to be significant deviation from normality in the residuals, as seen by the significant KS test results on the left. Let's now consider the model with just 2 random effects: time and location, in which location consists of zip codes nested within states.
 
 ```{r gof_fit_var_5}
 # simulate residuals from the model:
-res = simulateResiduals(fit_var_5)
+res_fit_var_5 = simulateResiduals(fit_var_5)
 
 # plot observed quantile versus expected quantile to assess distribution fit, and predicted value versus standardised residuals for unmodelled pattern in the residuals
-plot(res)
+plot(res_fit_var_5)
 ```
 
-As can be seen in the above plots, this model that includes location as a nested random effect of zip codes within states appears to be a better fit for the data. Now, there is no indication of significant deviations from normality, nor overdisperion or outliers. Thus, we will select this model to further analyse. Now we can look more into the residuals of the selected model.
+As can be seen in the above plots, this model that includes location as a nested random effect of zip codes within states appears to be a better fit for the data. Now, there is no indication of significant deviations from normality, nor overdisperion or outliers in the residuals. Thus, we will select this model to further analyse.
 
-```{r Goodness-of-fit}
-plot(residuals(fit_var_5),
-     ylab = "Residuals")
-```
+## Analyse Performance Benchmarks
 
-Look at the distribution of the random effects:
-
-```{r res,include=TRUE}
-res <- ranef(fit_var_5)
-
-hist(res$earliest_cr_line[,1])
-
-hist(res$location[,1])
-```
-
-*** EXPLAIN ABOVE 2 PLOTS
-
-Now, we can assess the performance benchmarks of the chosen extended model and compare these to the final model we obtained in the first part of this analysis. We begin by creating a ROC curve and computing a Gini score for the extended model.
+Now, we can move on to analyse the selected model's performance benchmarks and can compare these to the final model we obtained in the first part of this analysis. We begin by creating a ROC curve and computing a Gini score for the chosen extended model.
 
 ```{r extended_roc}
 # ROC curve on scaled extended data for fit_var_5
@@ -934,6 +919,25 @@ plot(g, main = "Extended Model ROC Curve")
 ```
 
 As can be seen in the above plot, the extended model has a $AUC=0.7183$ and $Gini=0.437$. This is an improved score from that of the model from the first part of our analysis, which had a $AUC=0.7052$ and $Gini=0.410$. It is important to note that for the above plot, we were only able to assess the performance of our model using "seen" data. Thus, the metrics we are comparing from the part 1 model are also those obtained using "seen" data (called training dataset). Based on our obtained AUC and Gini scores, we can say that our extended model does result in improved performance benchmarks, as this model is better able to predict loan repayment failure. In other words, accounting for variations in time and location improves our model's ability to predict whether applicants will default on their loans or not.
+
+Now, we can further analyse the residuals of this extended model to understand the effect of variations in time and location on credit risk.
+
+```{r fit_var_5_resid}
+plot(residuals(fit_var_5),
+     ylab = "Residuals")
+```
+
+Look at the distribution of the random effects:
+
+```{r fit_var_5_resid_2}
+res <- ranef(fit_var_5)
+
+hist(res$earliest_cr_line[,1])
+
+hist(res$location[,1])
+```
+
+*** EXPLAIN ABOVE 2 PLOTS
 
 ## Calculate Odds Ratio and CIs
 
@@ -1037,11 +1041,11 @@ For loans with a stated purpose of renewable energy, the odds of "repay_fail" oc
 
 Beyond these differences, this extended model had the same general set of significant covariates and interactions, in the same directions, though the effect sizes and significance values may vary.
 
-In terms of the selected model's random effects:
+In terms of the selected model's random effects and whether variations in time and location impact credit risk:
 
-location: The location random effect captures the variation in the response variable that is associated with different locations. The estimated standard deviation for the location random effect is approximately 0.2261. The estimated variance (0.05114) express the degree of variation between different locations, while the standard deviation provides a measure of this variation.
+* Location: The location (addr_state:zip_code) random effect captures the variation in the response variable that is associated with different locations. The estimated standard deviation for the location random effect is approximately 0.2261. The estimated variance (0.05114) express the degree of variation between different locations, while the standard deviation provides a measure of this variation.
 
-earliest_cr_line: The earliest_cr_line random effect captures the variation in the response variable associated with the year of an individual's earliest credit line. The estimated standard deviation for the earliest_cr_line random effect is approximately 0.1189. The estimated variance (0.01414) represents the degree of variation between different earliest credit lines, and the standard deviation (0.1189) express the magnitude of this variation.
+* Time: The time (earliest_cr_line) random effect captures the variation in the response variable associated with the year of an individual's earliest credit line. The estimated standard deviation for the earliest_cr_line random effect is approximately 0.1189. The estimated variance (0.01414) represents the degree of variation between different earliest credit lines, and the standard deviation (0.1189) express the magnitude of this variation.
 
 Overall, the inclusion of random effects seems to enhance the understanding of underlying variability in the response variable (repay_fail).
 
@@ -1056,11 +1060,9 @@ Specifically, below are the three questions we set out to answer in part 2:
 5. Does credit risk change over time or between states? This is not something the bank has previously
 investigated and results may inform modified loan policies in the future.
 
-*** ANSWER Q1
+*** ANSWER Q3
 
 In terms of the second question (question 4 in the list), we were a bit surprised by the inclusion of 4 more significant covariates in our model, after accounting for this variation:
-
-*** ADD EFFECTS, CIS, P-VALUES BELOW
 
 * Debt consolidation
 * Educational
@@ -1088,15 +1090,15 @@ While our final model may not be the _best_ model, it is a _better_ model than t
 
 ## Caveats
 
-* Imbalance of repay_fail class: Many more cases of non-failure to repay, which might influence the model to favour that outcome
-* Extended model has a relatively high tolerance value, which could potentially be further reduced by tuning other model parameters
-* We have only included a subset of the possible variables which may help to predict loan default
-* We do not know the time frame of the data that is included, and it might be helpful to know this to ensure that we use recent data for model building and prediction tasks
+* We have only included a subset of the possible variables which may help to predict loan default, and there may be other variables that result in a better model with improved performance benchmarks compared to the one we have presented in this report.
+* Our extended model has a relatively high tolerance value, which could potentially be further reduced by tuning other model parameters. Furthermore, we have not been able to assess the extended model's predictive performance, as we did not have access to any unseen data that included the necessary variables to do so.
+* We do not know the time frame of the data that is included, and it might be helpful to know this to ensure that we use recent data for model building and prediction tasks.
+* There is an imbalance within the repay_fail class, in that there exist many more cases of non-failure to repay, which might influence our model to favour that outcome.
 
 ## Future Directions
 
-* You might want to explore other variables and interactions between variables that may help to predict loan default
-* If provided with a validation dataset which included the extended variables of location and time, you could choose to use the extended model to predict loan default, and compare the extended model's prediction performance with that of the new model from part 1 of this analysis
+* You could choose to explore other variables and interactions between variables that may help to better predict loan default.
+* If provided with a validation dataset which included the extended variables of location and time, you could choose to use the extended model to predict loan default, and compare the extended model's prediction performance with that of the new model from part 1 of this analysis.
 
 # References
 
