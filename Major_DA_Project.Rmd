@@ -728,7 +728,7 @@ Thus, in terms of answering the first question we set out to answer with our ana
 
 1. How does this new model perform compared to the one used previously? How can it be expected to perform on new loan applications?
 
-We can say that our new model outperforms the one used previously. It does a relatively good job on new loan applications. As our confusion matrix demonstrated, out of 7,683 applicants included in the training dataset, 6,504 of them will not default and our model has accurately classified them as so, and 21 of them will default and have been accurately classified as so. However, our model falsely classified 1,138 applicants as defaulters and 20 applicants as non-defaulters. While there is still certainly room for improvement, this model is still performing much better than the previous model, so we have successfully addressed question 1.
+We can say that our new model outperforms the one used previously. It does a relatively good job on new loan applications. As our confusion matrix demonstrated, out of 7,683 applicants included in the training dataset, 6,497 of them will not default and our model has accurately classified them as so, and 28 of them will default and have been accurately classified as so. However, our model falsely classified 1,131 applicants as non-defaulters and 27 applicants as defaulters. While there is still certainly room for improvement, this model is still performing much better than the previous model, so we have successfully addressed question 1.
 
 In terms of the second question of our analysis (see below):
 
