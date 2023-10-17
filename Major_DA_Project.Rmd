@@ -854,6 +854,9 @@ Gini
 plot(g, main = "ROC Curve for fit_var_5")
 ```
 
+
+
+
 *** EXPLAIN WHAT THE CHOSEN MODEL IS
 
 ## Analyse Performance Benchmarks
@@ -962,6 +965,17 @@ ggplot(plot_data, aes(x = OddsRatio, xmin = LowerCI, xmax = UpperCI, y = Variabl
   theme_minimal() +
   labs(x = "Odds Ratio", y = "Variable") +
   ggtitle("Odds Ratios of Rapyment Failure for GLMM")
+```
+
+```{r accuracy_confmatrix_GLMM}
+fit_var_5 <- ifelse(prob > 0.5, "1", "0")
+fit_var_5 <- as.factor(fit_var_5)
+
+require(caret)
+cm <- confusionMatrix(data=fit_var_5,
+                    reference=extended_scaled$repay_fail,
+                    positive="1")
+cm
 ```
 
 ### Interpretations
