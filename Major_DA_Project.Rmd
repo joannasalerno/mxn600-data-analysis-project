@@ -682,7 +682,7 @@ ggplot(plot_data, aes(x = OddsRatio, xmin = LowerCI, xmax = UpperCI, y = Variabl
   xlim(c(0, max(plot_data$UpperCI + 1))) +  
   theme_minimal() +
   labs(x = "Odds Ratio", y = "Variable") +
-  ggtitle("Odds Ratios of Rapyment Failure for GLM")
+  ggtitle("Odds Ratios of Repayment Failure for GLM")
 ```
 
 Odds ratio of repayment failure for GLM model including confidence interval ranges compared to baseline: 36-month term, less than one year of employment, and loan purpose = car.
@@ -1003,7 +1003,7 @@ ggplot(plot_data, aes(x = OddsRatio, xmin = LowerCI, xmax = UpperCI, y = Variabl
   xlim(c(0, max(plot_data$UpperCI + 1))) +  
   theme_minimal() +
   labs(x = "Odds Ratio", y = "Variable") +
-  ggtitle("Odds Ratios of Rapyment Failure for GLMM")
+  ggtitle("Odds Ratios of Repayment Failure for GLMM")
 ```
 
 ```{r accuracy_confmatrix_GLMM}
