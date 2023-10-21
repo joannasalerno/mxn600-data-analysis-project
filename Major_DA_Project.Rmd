@@ -84,7 +84,7 @@ str(train_data)
 
 Upon further investigation of the structure of the training data, we can see that 14 of the 19 variables are currently of numeric type, and the remaining 5 variables are characters.
 
-We will now remove variable X, which is the number of each record, from all datasets, as it is not necessayr for this analysis.
+We will now remove variable X, which is the number of each record, from all datasets, as it is not necessary for this analysis.
 
 ```{r remove_X_from_datasets}
 train_data <- train_data[, -1]
@@ -118,7 +118,7 @@ na_rows <- train_data %>% filter_all(any_vars(. %in% c('n/a')))
 head(na_rows)
 ```
 
-Based on the above output, there are a total of 591 n/a (string) in this dataset. These all appear to be from the employment length column. We will move forward and assume that this is not truly missing data, but rather, means that the applicant is not currently employed. We will further examine the ditribution of each variable by creating exploratory plots, and this will further clarify the meaning of some of the values contained within each column of the dataset.
+Based on the above output, there are a total of 591 n/a (string) in this dataset. These all appear to be from the employment length column. We will move forward and assume that this is not truly missing data, but rather, means that the applicant is not currently employed. We will further examine the distribution of each variable by creating exploratory plots, and this will further clarify the meaning of some of the values contained within each column of the dataset.
 
 ## Exploratory Plots
 ### Data Preparation
@@ -198,9 +198,9 @@ Plot1 is a histogram that displays the distribution of interest rates in the dat
 
 Plot2 is a boxplot that shows the distribution of annual incomes based on different verification statuses. Each box represent a category of verification status. Based on the plot, we can see that we have similar sized boxes for all three categories which suggests that the median income for applicants in these categories is relatively consistent. However, we can see the presence of outlier in all three verification_status categories indicating that there are individuals with very high income within each group.
 
-Plot3 is a boxplot that compares the loan amounts for both successfull and unsuccessfull loan repayments. Based on the plot, it can be seen that the median loan amount for both categories of loan repayment status are more or less consistent. The presence of outlier in both categories indicates that there are individuals with very high loan amount within each group. 
+Plot3 is a boxplot that compares the loan amounts for both successful and unsuccessful loan repayments. Based on the plot, it can be seen that the median loan amount for both categories of loan repayment status are more or less consistent. The presence of outlier in both categories indicates that there are individuals with very high loan amount within each group. 
 
-Plot4 is a boxplot that compares annual income between successful and unsuccessful loan repayments. Based on the plot it can be seen that most individuals that successfully paid off their loans are more or less consistent with the ones who failed with an exception of ouliers in both categories.
+Plot4 is a boxplot that compares annual income between successful and unsuccessful loan repayments. Based on the plot it can be seen that most individuals that successfully paid off their loans are more or less consistent with the ones who failed with an exception of outliers in both categories.
 
 Plot5 is scatter plot that displays relationship annual income and loan amount. 
 
@@ -253,7 +253,9 @@ Following our examination of this matrix, each variable within pairs of highly c
 
 # New Credit Risk Model
 
-Keeping our above exploratory analysis in mind, as well as reviewing the [Five Cs of Credit](https://www.investopedia.com/ask/answers/040115/what-most-important-c-five-cs-credit.asp) information, we have decided that the below variables are important predictors in assessing the risk of credit default:
+Keeping our above exploratory analysis in mind, we also reviewed articles on the factors that traditionally impact an individual's credit risk, especially when applying for loans. Both [Understanding the Five Cs of Credit](https://www.investopedia.com/ask/answers/040115/what-most-important-c-five-cs-credit.asp) and [Top 5 Factors Affecting Credit Risk When Taking A Personal Loan](https://www.forbes.com/advisor/in/personal-loan/top-5-factors-affecting-credit-risk-when-taking-a-personal-loan/) discussed the same 5 major factors impacting credit risk: 1) capacity, 2) capital, 3) conditions, 4) collateral, and 5) character. Factors related to capacity include an individual's employment history and job stability, as well as their annual income. Debt to equity ratios are also assessed as part of capacity. Capital demonstrates an individual's net worth and allows them to list assets that could be used as a reserve in unforeseen circumstances. Lenders will look at current market conditions as well to assess the relative risk presented to the applicant in repaying the loan. Collateral includes assets an applicant may pledge as security to be used in the case that they fail to repay the loan. Finally, character encompasses many factors, including an individual's credit history (how long they have had credit for?), repayment history (are they typically paying on time or not?), any previous loan defaults, and derogatory records for the individual. These 5 factors have been cited in multiple financial resources as those most important in evaluating and determining an applicant's credit risk.
+
+Taking the above research into consideration, as well as our exploratory analysis of the available data, we have been able to match up some of the variables within the available data with those cited as being traditionally important for determining credit risk. For example, we have annual income (*annual_inc*), employment length (*emp_length*), revolving balances (*revol_bal*), revolving utilization, (*revol_util*), and debt-to-income ratio (*dti*) variables which all relate to the first factor listed above, capacity. We do not seem to have any relevant data to account for capital, but perhaps interest rate (*int_rate*) may be an indication of some of the market conditions, as interest rates tend to be higher during financial crises or recessions. We also have home ownership (*home_ownership*), which includes whether an applicant owns a home or is renting, and this could be considered under the factor of collateral. Finally, the following variables may relate to the factor of character: their credit age (*credit_age_yrs*), which demonstrates part of their credit history; total accounts (*total_acc*), which may demonstrate credit usage; inquiries in the last 6 months (*inq_last_6mths*), which demonstrates the frequency the individual is applying for credit or conducting activities which require credit check inquiries; the number of 30+ days past-due incidences of delinquency for the past 2 years (*delinq_2yrs*); number of derogatory public records (*pub_rec*). Other variables that seem relevant and potentially important to provide more information on the requested loan within the context of the applicant include the loan's purpose (*purpose*), amount (*loan_amnt*), and term length (*term*). Finally, we feel as though verification status (*verification_status*) may be important, as this indicates whether an applicant's income was officially verified. If an application's income is verified, this may prove beneficial to their application. Thus, we have listed below the initial 16 variables we wish to further investigate in relation to credit risk:
 
 annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, revol_util, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs, pub_rec
                    
@@ -296,7 +298,7 @@ val_scaled_data <- val_data %>%
 
 ## Variable Selection
 
-First, we have decided to perform stepwiseAIC to identify the most important predictors of loan default, from the list of variables we identified above: annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, revol_util, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs, pub_rec.
+First, we have decided to perform stepwiseAIC to identify the most important predictors of loan default, from the list of 16 variables we identified above: annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, revol_util, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs, and pub_rec.
 
 ```{r stepAIC}
 # Full model for backwards selection:
@@ -343,7 +345,7 @@ Based on the above output, both models produced the same formula (same list of c
 formula(backward_sel_model)
 ```
 
-According to stepwiseAIC, the best predictors of repay_fail are term, int_rate, emp_length, annual_inc, purpose, inq_last_6mths, pub_rec, revol_bal, and revol_util. We will move forward with these covariates to finetune a model that not only fits the data well but improves predictive performance compared to the credit risk model the bank has been using.
+According to stepwiseAIC, the best predictors of repay_fail are term, int_rate, emp_length, annual_inc, purpose, inq_last_6mths, pub_rec, revol_bal, and revol_util. We will move forward with these covariates to fine tune a model that not only fits the data well but improves predictive performance compared to the credit risk model the bank has been using.
 
 First, we'll create a model using the same exact formula suggested by stepAIC:
 
@@ -359,13 +361,20 @@ Print the model's AIC:
 AIC(model1)
 ```
 
-As we already saw above and just reviewed, this model has an $AIC = 18160.57$. Next, we will add a few interactions between some of the covariates that make the most sense based on our credit risk research.
+As we already saw above and just reviewed, this model has an $AIC = 18160.57$. Next, we will add a few interactions between some of the covariates that make the most sense based on our credit risk research. Specifically, we want to investigate the interactions between:
+
+* term and int_rate, as interest rate makes sense in the context of the length of time the interest is spread out over
+* term and emp_length, as perhaps shorter terms may be less risky with more stable employment histories
+* term and annual_inc, as perhaps shorter terms may be less risky with higher annual incomes
+* term and purpose, as perhaps credit risk changes depending on the term and loan's purpose (perhaps longer term loans are more appropriate for typically longer term purposes)
+* int_rate and emp_length, as perhaps higher interest rates may not be as risky for individuals with stable employment histories
+* int_rate and annual_inc, as perhaps higher interest rates may not be as risky for individuals with higher annual incomes
 
 ```{r fit_model2}
 model2 <- glm(repay_fail ~ term + int_rate + emp_length + annual_inc + purpose + 
                 inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
-                term * emp_length + term * annual_inc + term * purpose + term * pub_rec +
-                int_rate * emp_length + int_rate * pub_rec + int_rate * annual_inc,
+                term * emp_length + term * annual_inc + term * purpose +
+                int_rate * emp_length + int_rate * annual_inc,
               data = train_scaled_data, family = "binomial")
 ```
 
@@ -375,13 +384,13 @@ Print the model's AIC:
 AIC(model2)
 ```
 
-The AIC of the new model is higher, with a value of 18173.81. This is to be expected, though, as this new model is penalized for having more covariates than the first model we fit. We will now perform a $\chi^2$-test to confirm whether the addition of these interactions are adding value to the model compared to the model without any interaction terms:
+The AIC of the new model is higher, with a value of 18171.08. This is to be expected, though, as this new model is penalized for having more covariates than the first model we fit. We will now perform a $\chi^2$-test to confirm whether the addition of these interactions are adding value to the model compared to the model without any interaction terms:
 
 ```{r anova_model1_model2}
 anova(model1, model2, test = "Chisq")
 ```
 
-As the $\chi^2$-test has a $p < 0.05$, this provides us with enough evidence to reject the null hypothesis that model 1 without interactions and model 2 with interactions explain the same amount of variation in the data. In other words, model 2 is significantly better at explaining the variation in the data compared to model 1. Thus, we will consider interactions between covariates. However, we will now decrease the number of interactions in our model, as model 2 included quite a few interactions. We will only consider the interaction between term and interest rate, as it seems to make sense that these two covariates together would have an impact on loan default risk.
+As the $\chi^2$-test has a $p < 0.05$ ($p = 0.0037$), this provides us with enough evidence to reject the null hypothesis that model 1 without interactions and model 2 with interactions explain the same amount of variation in the data. In other words, model 2 is significantly better at explaining the variation in the data compared to model 1. Thus, we will consider interactions between covariates. However, we will now decrease the number of interactions in our model, as model 2 included quite a few interactions. We will only consider the interaction between term and interest rate, as it seems to make sense that these two covariates together would have an impact on loan default risk. Furthermore, including fewer interactions will assist in our model's interpretability, so that it may ultimately be more useful to the bank. Our goal is twofold in that we want to build an improved model, but this model needs to also be easy to interpret and apply in context. Thus, we want to minimize the complexity of this new model as much as possible so that we can better communicate and interpret our findings, and so that the bank can more easily use and understand our model.
 
 ```{r fit_model3}
 model3 <- glm(repay_fail ~ term + int_rate + emp_length + annual_inc + purpose +
@@ -397,15 +406,17 @@ AIC(model3)
 
 The AIC of model 3 is lower than that of both model 1 and model 2. We will now conduct $\chi^2$-tests to confirm whether model 3 is significantly better at explaining the variation in the data than both model 1 and model 2.
 
+Compare model 3 and model 1:
 ```{r anova_model1_model3}
 anova(model1, model3, test = "Chisq")
 ```
 
+Compare model 3 and model 2:
 ```{r anova_model2_model3}
 anova(model2, model3, test = "Chisq")
 ```
 
-As both $\chi^2$-tests have a $p < 0.05$, this indicates that model 3 is significantly better at explaining the variation in the data, as compared to both model 1 and model 2. We will move forward with model 3.
+As both $\chi^2$-tests have a $p < 0.05$, this indicates that model 3 is significantly better at explaining the variation in the data, as compared to both model 1 and model 2. Thus, for this reason, as well as the fact that model 3 should be relatively easy to interpret, especially in comparison with model 2, we will move forward with model 3.
 
 ```{r summary_model3}
 summary(model3)
@@ -413,7 +424,7 @@ summary(model3)
 
 ## Logit Link Function
 
-Next, we will fit a model using the logit link function, with our final list of covariates.
+Next, we will fit a model using the logit link function, with our final list of covariates from model 3.
 
 ```{r fit_logit}
 fit_logit <- glm(repay_fail ~ int_rate + emp_length + annual_inc + purpose + 
@@ -712,15 +723,15 @@ We conducted our own loan application and credit risk research, and the results 
 
 repay_fail ~ term + int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util
 
-We then wanted to consider whether interactions between any of the variables were important or improved the model. So, we tested a few interactions between some of the variables. However, we ultimately did not want our model to include too many interaction terms, so we opted to only keep the interaction between interest rate and loan term, as this made the most logical sense. An interest rate on its own does not mean much until it is combined with either a loan amount or a loan term. In this case, we chose to select loan term. This led us to our final model formula:
+We then wanted to consider whether interactions between any of the variables were important or improved the model. So, we tested a few interactions between some of the variables. However, we ultimately did not want our model to include too many interaction terms to avoid unnecessary complexity, which would introduce more challenges in interpretations and later applications. So, we opted to only keep the interaction between interest rate and loan term, as this made the most logical sense to us. This is because an interest rate on its own does not mean much until it is combined with either a loan amount or a loan term, as an interest rate is applied in relation to an amount over a period of time. In this case, we chose to select loan term, as loan amount was not included in the formula provided by stepwiseAIC. This led us to our final model formula:
 
 repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate
 
-We justified arriving at this model by conducting $\chi^2$-tests between different tested models to determine whether new models with different variables and interactions were significantly better at explaining the variability in the data. We then took a look at the goodness-of-fit of our selected model, and we were pleased to find that our model fit the data reasonably well. We produced residuals plots which did not indicate any deviations from normality, overdispersion, or outliers in the model residuals. In other words, these plots demonstrated that our model was a good fit for the data. We also compared the AIC values of our final chosen model with the other models we fit, and the chosen model has the lowest AIC value.
+We justified arriving at this model by conducting $\chi^2$-tests between different tested models to determine whether new models with different variables and interactions were significantly better at explaining the variability in the data. We then took a look at the goodness-of-fit of our selected model, and we were pleased to find that our model fit the data reasonably well. We produced residuals plots which did not indicate any deviations from normality, overdispersion, or outliers in the model residuals. In other words, these plots demonstrated that our model was a good fit for the data and did a relatively good job of explaining the variation in the data. We also compared the AIC values of our final chosen model with the other models we fit, and the chosen model has the lowest AIC value.
 
 Just to be sure, we also tested different link functions with the same final model formula. We tested both a probit and complementary log-log link function. The probit model, while demonstrating a lower AIC value than the initial logit model, did not do as well in terms of prediction. Ultimately, we want our model to not only fit the data well, but also to do a good job of predicting whether applicants will default or not. The complementary log-log model had a higher AIC value than the initial logit model, and we chose to not assess its predictive performance because of this. Thus, we ultimately selected the logit link function as the best link function for our final model.
 
-*** BRIEFLY EXPLAIN ROC AND GINI SCORES AND WHAT THEY MEAN
+We produced receiver operating characteristic (ROC) curves and calculated Gini scores to test our model's performance. Our goal was to build a model that improved the ROC curve from those of the bank's previous models, so that the curve reached more towards the upper-left-hand corner of the graph area. This would mean that the model did a better job at correctly distinguishing between the classes of repayment (repay_fail == 1 vs repay_fail == 0). The Gini score is a numeric representation of the area under the ROC curve, which also indicates a model's classification performance.
 
 In terms of our final model's performance, it does much better than the credit risk model the bank was previously using. While the previous models yielded a $Gini=0.114$ on the training (seen) dataset and a $Gini=0.110$ on the validation (unseen) dataset, our models produced a $Gini=0.410$ on the training dataset and a $Gini=0.395$ on the validation dataset. This demonstrates that our model both performs well on seen data and also demonstrates good predictive performance on new, unseen data.
 
@@ -752,7 +763,7 @@ We found the relationship between interest rate and loan term on loan default to
 
 We believe the important variables in our model generally make sense when considering the research we conducted on credit risk. For example, interest rate and loan term will impact an individual's ability to repay a loan, and factors that typically lower an individual's credit score include their revolving balance (available credit) and utilization (used credit). Furthermore, having a higher number of recent credit inquiries and derogatory public records decrease an individual's credit score. Annual income is another factor that is typically assessed when considering whether to approve an individual's loan application, as being able to demonstrate consistent, sufficient income (including information about employment), can impact the application decision.
 
-We were somewhat surprised by some of the significant loan purposes. We did not initially find much in the research that indicated the effect of loan purpose on application approval, but it does seem to make sense that expenses such as medical bills, particularly if medical expenses are ongoing and high, and small businesses, especially depending on the economy, might make it harder for an individual to repay a loan on time. Perhaps the purpose of other is associated with an increase in risk of repayment failure, as individuals do not necessarily demonstrate that the purpose is meant for the short term and temporary. Moving surprised us, but perhaps if moving expenses are so astronomical and individuals are moving a long distance and getting set up with new jobs in new cities, it may take a while to get back on their feet, thus potentially affecting their ability to repay on time during the transition period. Finally, the purpose of vacations was initially surprising, but if individuals are taking out loans to pay for their vacations, it potentially means that they do not have the funds in the first place to pay for vacation. Thus, they are spedning money without necessarily showing that they have the means to pay it back.
+We were somewhat surprised by some of the significant loan purposes. We did not initially find much in the research that indicated the effect of loan purpose on application approval, but it does seem to make sense that expenses such as medical bills, particularly if medical expenses are ongoing and high, and small businesses, especially depending on the economy, might make it harder for an individual to repay a loan on time. Perhaps the purpose of other is associated with an increase in risk of repayment failure, as individuals do not necessarily demonstrate that the purpose is meant for the short term and temporary. Moving surprised us, but perhaps if moving expenses are so astronomical and individuals are moving a long distance and getting set up with new jobs in new cities, it may take a while to get back on their feet, thus potentially affecting their ability to repay on time during the transition period. Finally, the purpose of vacations was initially surprising, but if individuals are taking out loans to pay for their vacations, it potentially means that they do not have the funds in the first place to pay for vacation. Thus, they are spending money without necessarily showing that they have the means to pay it back.
 
 Now, we will move on to the second part of our analysis.
  
@@ -901,7 +912,7 @@ res_fit_var_5 = simulateResiduals(fit_var_5)
 plot(res_fit_var_5)
 ```
 
-As can be seen in the above plots, this model that includes location as a nested random effect of zip codes within states appears to be a better fit for the data. Now, there is no indication of significant deviations from normality, nor overdisperion or outliers in the residuals. Thus, we will select this model to further analyse.
+As can be seen in the above plots, this model that includes location as a nested random effect of zip codes within states appears to be a better fit for the data. Now, there is no indication of significant deviations from normality, nor overdispersion or outliers in the residuals. Thus, we will select this model to further analyse.
 
 ## Analyse Performance Benchmarks
 
@@ -1106,9 +1117,11 @@ Listed below are the references we consulted to conduct this analysis.
 
 [Control of Mixed Model Fitting](https://search.r-project.org/CRAN/refmans/lme4/html/lmerControl.html)
 
-[Five Cs of Credit](https://www.investopedia.com/ask/answers/040115/what-most-important-c-five-cs-credit.asp)
-
 [lme4 Convergence Warnings: Troubleshooting](https://rstudio-pubs-static.s3.amazonaws.com/33653_57fc7b8e5d484c909b615d8633c01d51.html)
 
 [lme4 Performance Tips](https://cran.r-project.org/web/packages/lme4/vignettes/lmerperf.html#:~:text=choice%20of%20optimizer,may%20be%20worth%20a%20try.)
+
+[Top 5 Factors Affecting Credit Risk When Taking A Personal Loan](https://www.forbes.com/advisor/in/personal-loan/top-5-factors-affecting-credit-risk-when-taking-a-personal-loan/)
+
+[Understanding the Five Cs of Credit](https://www.investopedia.com/ask/answers/040115/what-most-important-c-five-cs-credit.asp)
 
