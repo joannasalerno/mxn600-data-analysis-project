@@ -560,7 +560,7 @@ Gini
 plot(g)
 ```
 
-While the model fit with a probit link function has lower AIC than the model with a logit link function and similarly demonstrates goodness-of-fit for the data, the probit model has a slightly lower Gini score on the validation dataset. Thus, we'll consider the logit model as better than the probit model.
+While the model fit with a probit link function has lower AIC than the model with a logit link function and similarly demonstrates goodness-of-fit for the data, the probit model has a slightly lower Gini score on the validation dataset (Logit model: $Gini=0.410$ on train, $Gini=0.395$ on validation vs. Probit model: $Gini=0.410$ on train, $Gini=0.394$). Thus, we'll consider the logit model as better than the probit model.
 
 ## Cloglog Link Function
 
@@ -585,9 +585,37 @@ res_cloglog = simulateResiduals(fit_cloglog)
 plot(res_cloglog)
 ```
 
-As can be seen above, the model fit with the cloglog link function appears to be a good fit for the data, as there is no indication of non-normality, overdispersion, or outliers in the residuals. However, the cloglog model has a higher AIC than both the logit and probit models. Thus, we will not assess this model any further.
+### Cloglog Model: Performance
 
-Based on the comparisons conducted between the three different link functions for our GLM model, we will choose to use the model with the logit link function as our final model. This model demonstrated the best combination of AIC value and performance, including predictive performance, compared to the other models.
+Now, we will assess the performance of the model fit using the cloglog link function for comparison against the logit link function model.
+
+Training dataset:
+```{r cloglog_train_roc}
+# Cloglog model: ROC curve on scaled train data 
+prob_cloglog_train=predict(fit_cloglog,type=c("response"))
+g <- roc(train_scaled_data$repay_fail ~ prob_cloglog_train)
+AUC <- g$auc
+AUC
+Gini <- 2*(AUC - 1/2)
+Gini
+plot(g)
+```
+
+Validation dataset:
+```{r cloglog_val_roc}
+# Cloglog model: ROC curve on scaled validation data 
+prob_cloglog_val=predict(fit_cloglog,newdata = val_scaled_data,type=c("response"))
+g <- roc(val_scaled_data$repay_fail ~ prob_cloglog_val)
+AUC <- g$auc
+AUC
+Gini <- 2*(AUC - 1/2)
+Gini
+plot(g)
+```
+
+As can be seen above, the model fit with the cloglog link function appears to be a good fit for the data, as there is no indication of non-normality, overdispersion, or outliers in the residuals. However, the cloglog model has a higher AIC than both the logit and probit models. Furthermore, the cloglog model has a slightly lower Gini score on the the training dataset (Logit model: $Gini=0.410$ on train, $Gini=0.395$ on validation vs. Cloglog model: $Gini=0.407$ on train, $Gini=0.395$).
+
+Based on the comparisons conducted between the three different link functions for our GLM model, we will choose to use the model with the logit link function as our final model. This model demonstrated the best combination of AIC value and performance, including predictive performance on unseen data, compared to the other models.
 
 ## Calculate Odds Ratio and CI
 
@@ -639,43 +667,43 @@ knitr::kable(
 
 Listed below are interpretations of the covariates of our final model:
 
-- The intercept or baseline refers to individuals who have been employed for less than one year, are seeking a car loan, and have a 36-month loan term when all other numeric predictors are equal to zero, and is statistically significant (95% CI: [0.08,0.13], $p < 2e-16$).
+* The intercept or baseline refers to individuals who have been employed for less than one year, are seeking a car loan, and have a 36-month loan term when all other numeric predictors are equal to zero, and is statistically significant (95% CI: [0.08,0.13], $p < 2e-16$).
 
-- For a one-unit increase in the interest rate, the odds of "repay_fail" occurring increase by a factor of approximately 1.57 (95% CI: [1.48,1.67], $p < 2e-16$). As can be seen by the low p-value, this is a very significant effect.
+* For a one-unit increase in the interest rate, the odds of "repay_fail" occurring increase by a factor of approximately 1.57 (95% CI: [1.48,1.67], $p < 2e-16$). As can be seen by the low p-value, this is a very significant effect.
 
-- For individuals with 1 to 10 plus years of employment, none of these employment lengths have a significant effect on the odds of "repay_fail" occurring compared to the reference category (less than one year). Their odds ratios are close to 1, and all $p > 0.05$, indicating that these employment lengths do not significantly impact the likelihood of loan repayment failure.
+* For individuals with 1 to 10 plus years of employment, none of these employment lengths have a significant effect on the odds of "repay_fail" occurring compared to the reference category (less than one year). Their odds ratios are close to 1, and all $p > 0.05$, indicating that these employment lengths do not significantly impact the likelihood of loan repayment failure.
 
-For individuals with missing/unspecified employment lengths or unemployed individuals ("n/a"), the odds of "repay_fail" occurring increase by a factor of approximately 1.73 (95% CI: [1.37,2.19], $p = 4.11e-06$), compared to baseline (less than one year). This indicates that the absence of employment length information is associated with a higher likelihood of loan repayment failure.
+* For individuals with missing/unspecified employment lengths or unemployed individuals ("n/a"), the odds of "repay_fail" occurring increase by a factor of approximately 1.73 (95% CI: [1.37,2.19], $p = 4.11e-06$), compared to baseline (less than one year). This indicates that the absence of employment length information is associated with a higher likelihood of loan repayment failure.
 
-- For a one-unit increase in annual income, the odds of "repay_fail" occurring decrease by a factor of approximately 0.71 (95% CI: [0.67,0.75], $p < 2e-16$).
+* For a one-unit increase in annual income, the odds of "repay_fail" occurring decrease by a factor of approximately 0.71 (95% CI: [0.67,0.75], $p < 2e-16$).
 
-- For loans with a stated purpose of "credit card", "debt consolidation", "educational", "home improvement", "house", "major purchase", "renewable energy", and "wedding", there is no significant effect on the odds of "repay_fail" occurring compared to the reference category (car). As all $p > 0.05$, these loan purposes do not significantly impact the likelihood of loan repayment failure.
+* For loans with a stated purpose of "credit card", "debt consolidation", "educational", "home improvement", "house", "major purchase", "renewable energy", and "wedding", there is no significant effect on the odds of "repay_fail" occurring compared to the reference category (car). As all $p > 0.05$, these loan purposes do not significantly impact the likelihood of loan repayment failure.
 
-For loans with a stated purpose of "medical", the odds of "repay_fail" occurring increase by a factor of approximately 1.83 (95% CI: [1.30-2.57], $p = 0.000502$), compared to the baseline (car).
+     + For loans with a stated purpose of "medical", the odds of "repay_fail" occurring increase by a factor of approximately 1.83 (95% CI: [1.30-2.57], $p = 0.000502$), compared to the baseline (car).
 
-For loans with a stated purpose of "moving", the odds of "repay_fail" occurring increase by a factor of approximately 1.65 (95% CI: [1.15,2.36], $p = 0.006978$), compared to baseline (car).
+    + For loans with a stated purpose of "moving", the odds of "repay_fail" occurring increase by a factor of approximately 1.65 (95% CI: [1.15,2.36], $p = 0.006978$), compared to baseline (car).
 
-For loans with a stated purpose of "other", the odds of "repay_fail" occurring increase by a factor of approximately 1.58 (95% CI: [1.24,2.00], $p = 0.000211$), compared to baseline (car).
+    + For loans with a stated purpose of "other", the odds of "repay_fail" occurring increase by a factor of approximately 1.58 (95% CI: [1.24,2.00], $p = 0.000211$), compared to baseline (car).
 
-For loans with a stated purpose of "small business", the odds of "repay_fail" occurring increase by a factor of approximately 2.78 (95% CI: [2.15,3.59], $p = 5.80e-15$), compared to baseline (car).
+    + For loans with a stated purpose of "small business", the odds of "repay_fail" occurring increase by a factor of approximately 2.78 (95% CI: [2.15,3.59], $p = 5.80e-15$), compared to baseline (car).
 
-For loans with a stated purpose of "vacation", the odds of "repay_fail" occurring increase by a factor of approximately 1.56 (95% CI: [1.01,2.43], $p = 0.047421$), compared to baseline (car). 
+    + For loans with a stated purpose of "vacation", the odds of "repay_fail" occurring increase by a factor of approximately 1.56 (95% CI: [1.01,2.43], $p = 0.047421$), compared to baseline (car). 
 
-As mentioned above, the specific loan purposes of "medical," "moving," "other," "small_business", and "vacation" are all associated with a higher likelihood of loan repayment failure, as each had a statistically significant effect with a $p < 0.05$. The effect of small business loan purposes is the most significant with the smallest p-value, while vacation loan purposes have a lesser degree of effect.
+    + As mentioned above, the specific loan purposes of "medical," "moving," "other," "small_business", and "vacation" are all associated with a higher likelihood of loan repayment failure, as each had a statistically significant effect with a $p < 0.05$. The effect of small business loan purposes is the most significant with the smallest p-value, while vacation loan purposes have a lesser degree of effect.
  
-- For a one-unit increase in the number of inquiries in past 6 months, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: [1.20,1.28], $p < 2e-16$). As can be seen by the low p-value, this is a very significant effect.
+* For a one-unit increase in the number of inquiries in past 6 months, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: [1.20,1.28], $p < 2e-16$). As can be seen by the low p-value, this is a very significant effect.
 
-- For a one-unit increase in the number of derogatory public records, the odds of "repay_fail" occurring increase by a factor of approximately 1.06 (95% CI: [1.03,1.10], $p = 0.000332$).
+* For a one-unit increase in the number of derogatory public records, the odds of "repay_fail" occurring increase by a factor of approximately 1.06 (95% CI: [1.03,1.10], $p = 0.000332$).
 
-- For a one-unit increase in revolving balance, the odds of "repay_fail" occurring increase by a factor of approximately 1.10 (95% CI: [1.06,1.14], $p = 5.70e-06$).
+* For a one-unit increase in revolving balance, the odds of "repay_fail" occurring increase by a factor of approximately 1.10 (95% CI: [1.06,1.14], $p = 5.70e-06$).
 
-- For a one-unit increase in revolving credit utilization, the odds of "repay_fail" occurring increase by a factor of approximately 1.12 (95% CI: [1.07,1.18], $p = 4.05e-07$).
+* For a one-unit increase in revolving credit utilization, the odds of "repay_fail" occurring increase by a factor of approximately 1.12 (95% CI: [1.07,1.18], $p = 4.05e-07$).
 
-- Having a 60-month loan term increases the odds of "repay_fail" occurring by a factor of approximately 1.67 (95% CI: [1.51,1.85], $p < 2e-16$), compared to the reference category (36-month loan term).
+* Having a 60-month loan term increases the odds of "repay_fail" occurring by a factor of approximately 1.67 (95% CI: [1.51,1.85], $p < 2e-16$), compared to the reference category (36-month loan term).
 
-- The negative estimate for the interaction between interest rate and the 60-month term suggests that the effect of interest rate on "repay_fail" is less severe for loans with a 60-month term compared to the reference category of the 36-month term. In other words, while interest rate still has a significant impact on loan repayment on its own, its impact differs for loans with longer terms.
+* The negative estimate for the interaction between interest rate and the 60-month term suggests that the effect of interest rate on "repay_fail" is less severe for loans with a 60-month term compared to the reference category of the 36-month term. In other words, while interest rate still has a significant impact on loan repayment on its own, its impact differs for loans with longer terms.
 
-The interaction between interest rate and the 60-month loan term decreases the odds of "repay_fail" by a factor of approximately 0.90 (95% CI: [0.82,0.98], $p = 0.013086$), compared to baseline. The relationship between interest rate and loan repayment may differ depending on the term length, with the effect changing for longer-term loans.
+    + The interaction between interest rate and the 60-month loan term decreases the odds of "repay_fail" by a factor of approximately 0.90 (95% CI: [0.82,0.98], $p = 0.013086$), compared to baseline. The relationship between interest rate and loan repayment may differ depending on the term length, with the effect changing for longer-term loans.
 
 ## Odds Ratio Plot with CIs
 
@@ -757,11 +785,27 @@ Our model summary demonstrated that the important (and in this case, important m
 * 60-month loan term
 * Interest rate * 60-month loan term
 
-Thus, only two of the important covariates in our model were associated with a significant decrease in the risk of credit default: annual income and the interaction between interest rate and the 60-month loan term. All other listed important covariates are associated with an increase in the risk of credit default (effect sizes and confidence intervals are presented in the list above).
+Only two of the important covariates in our model were associated with a significant decrease in the risk of credit default: annual income, which was associated with a decreased risk of default by a factor of 0.71 (95% CI: [0.67,0.75], $p < 2e-16$), and the interaction between interest rate and the 60-month loan term, which was associated with a decreased risk of default by a factor of 0.90 (95% CI: [0.82,0.98], $p = 0.013086$). All other listed important covariates are associated with an increase in the risk of credit default. Of these, the covariates associated with the larger increased risks of credit default are: the loan purposes of small business, with an increased risk of default by a factor of 2.78 (95% CI: [2.15,3.59], $p = 5.80e-15$), and medical, with an increased risk of default by a factor of 2.78 (95% CI: [2.15,3.59], $p = 5.80e-15$). Applicants with a value of "n/a" for employment length, whether that means they are unemployed or simply did not provide this information, also had a relatively large increased risk of default compared to other covariates, by a factor of 1.73 (95% CI: [1.37,2.19], $p = 4.11e-06$).
 
 We found the relationship between interest rate and loan term on loan default to be interesting. While on their own, both interest rate and the 60-month loan term were associated with an increase in the odds that an applicant will fail to repay, the interaction between these two variables was associated with a decrease in the odds of repayment failure. This indicates that the relationship between interest rate and loan repayment may differ depending on the term length, with the effect changing for longer-term loans.
 
-We believe the important variables in our model generally make sense when considering the research we conducted on credit risk. For example, interest rate and loan term will impact an individual's ability to repay a loan, and factors that typically lower an individual's credit score include their revolving balance (available credit) and utilization (used credit). Furthermore, having a higher number of recent credit inquiries and derogatory public records decrease an individual's credit score. Annual income is another factor that is typically assessed when considering whether to approve an individual's loan application, as being able to demonstrate consistent, sufficient income (including information about employment), can impact the application decision.
+We believe the important variables in our model generally make sense when considering the variables that are traditionally important when predicting credit risk in the banking sector, which we determined through conducting some research on our own. For example, in the banking sector, the "5 Cs" have been said to be important in determining an individual's credit risk, and these include: capacity, capital, conditions, collateral, and capital. Our final model's important variables include annual income, employment length, revolving balances, and revolving utilization, which are all related to an individual's capacity to repay a loan. 
+
+***Will reformat:***
+interest rate and loan term will impact an individual's ability to repay a loan, and factors that typically lower an individual's credit score include their revolving balance (available credit) and utilization (used credit). Furthermore, having a higher number of recent credit inquiries and derogatory public records decrease an individual's credit score. Annual income is another factor that is typically assessed when considering whether to approve an individual's loan application, as being able to demonstrate consistent, sufficient income (including information about employment), can impact the application decision.
+
+* Interest rate
+* Loan purposes of medical, moving, small business, vacation or other
+* Number of inquiries in the last 6 months
+* Number of derogatory public records
+* 60-month loan term
+* Interest rate * 60-month loan term
+
+Taking the above research into consideration, as well as our exploratory analysis of the available data, we have been able to match up some of the variables within the available data with those cited as being traditionally important for determining credit risk. For example, we have annual income (*annual_inc*), employment length (*emp_length*), revolving balances (*revol_bal*), revolving utilization, (*revol_util*), and debt-to-income ratio (*dti*) variables which all relate to the first factor listed above, capacity. We do not seem to have any relevant data to account for capital, but perhaps interest rate (*int_rate*) may be an indication of some of the market conditions, as interest rates tend to be higher during financial crises or recessions. We also have home ownership (*home_ownership*), which includes whether an applicant owns a home or is renting, and this could be considered under the factor of collateral. Finally, the following variables may relate to the factor of character: their credit age (*credit_age_yrs*), which demonstrates part of their credit history; total accounts (*total_acc*), which may demonstrate credit usage; inquiries in the last 6 months (*inq_last_6mths*), which demonstrates the frequency the individual is applying for credit or conducting activities which require credit check inquiries; the number of 30+ days past-due incidences of delinquency for the past 2 years (*delinq_2yrs*); number of derogatory public records (*pub_rec*). Other variables that seem relevant and potentially important to provide more information on the requested loan within the context of the applicant include the loan's purpose (*purpose*), amount (*loan_amnt*), and term length (*term*). Finally, we feel as though verification status (*verification_status*) may be important, as this indicates whether an applicant's income was officially verified. If an application's income is verified, this may prove beneficial to their application. Thus, we have listed below the initial 16 variables we wish to further investigate in relation to credit risk:
+
+annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, revol_util, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs, pub_rec
+
+***Will reformat:***
 
 We were somewhat surprised by some of the significant loan purposes. We did not initially find much in the research that indicated the effect of loan purpose on application approval, but it does seem to make sense that expenses such as medical bills, particularly if medical expenses are ongoing and high, and small businesses, especially depending on the economy, might make it harder for an individual to repay a loan on time. Perhaps the purpose of other is associated with an increase in risk of repayment failure, as individuals do not necessarily demonstrate that the purpose is meant for the short term and temporary. Moving surprised us, but perhaps if moving expenses are so astronomical and individuals are moving a long distance and getting set up with new jobs in new cities, it may take a while to get back on their feet, thus potentially affecting their ability to repay on time during the transition period. Finally, the purpose of vacations was initially surprising, but if individuals are taking out loans to pay for their vacations, it potentially means that they do not have the funds in the first place to pay for vacation. Thus, they are spending money without necessarily showing that they have the means to pay it back.
 
@@ -835,9 +879,9 @@ summary(fit_var_1)
 As can be seen above, this model has an AIC value of 30131.5. Next, we'll add in another random effect of time, which is included as the variable "earliest_cr_line":
 
 ```{r fit_var_2}
-fit_var_2 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
-                     inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
-                     (1|addr_state) + (1|earliest_cr_line), data = extended_scaled, family = "binomial")
+# fit_var_2 <- glmer(repay_fail ~ int_rate + emp_length + annual_inc + purpose +
+#                      inq_last_6mths + pub_rec + revol_bal + revol_util + term * int_rate +
+#                      (1|addr_state) + (1|earliest_cr_line), data = extended_scaled, family = "binomial")
 ```
 
 Adding in time as a random effect caused a failed to converge warning. Thus, we will now increase the tolerance of this model to see if this helps:
