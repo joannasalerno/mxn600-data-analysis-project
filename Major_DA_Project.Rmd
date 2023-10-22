@@ -1193,18 +1193,26 @@ Though we have attempted to conduct a thorough and meaningful analysis to develo
 
 As mentioned above, further research could explore other variables and interactions between variables which were excluded in our analyses. This may further improve performance benchmarks the model's ability to predict whether applicants will fail to repay their loans or not. Furthermore, if provided with a validation dataset which included the extended variables of location and time, it may be useful to use the extended model to predict loan default on this "unseen" data and compare the extended model's prediction performance with that of the new model from the first part of our analysis. This could further validate whether the extended model improves performance benchmarks.
 
-# References
+# Bibliography
 
 Listed below are the references we consulted to conduct this analysis, including our research on credit risk as well as resources we consulted when addressing GLMM model convergence errors.
 
-[Control of Mixed Model Fitting](https://search.r-project.org/CRAN/refmans/lme4/html/lmerControl.html)
+Choksi, N. (n.d.). Top 5 Factors Affecting Credit Risk When Taking a Personal Loan. Forbes.
+  https://www.forbes.com/advisor/in/personal-loan/top-5-factors-affecting-credit-risk-when-taking-a-personal-loan/
 
-[How Much Do Solar Panels Cost? (2023 Guide)](https://www.marketwatch.com/guides/solar/solar-panel-cost/#:~:text=Based%20on%20our%20survey%20of,upward%20of%20%2425%2C000%20per%20installation.)
+CRAN. (n.d.-a). lme4 convergence warnings: Troubleshooting. R-Studio Pubs.
+  https://rstudio-pubs-static.s3.amazonaws.com/33653_57fc7b8e5d484c909b615d8633c01d51.html
 
-[lme4 Convergence Warnings: Troubleshooting](https://rstudio-pubs-static.s3.amazonaws.com/33653_57fc7b8e5d484c909b615d8633c01d51.html)
+CRAN. (n.d.-b). Lme4 performance tips. CRAN - R Project.
+  https://cran.r-project.org/web/packages/lme4/vignettes/lmerperf.html#:~:text=choice%20of%20optimizer,may%20be%20worth%20a%
+  0try.
 
-[lme4 Performance Tips](https://cran.r-project.org/web/packages/lme4/vignettes/lmerperf.html#:~:text=choice%20of%20optimizer,may%20be%20worth%20a%20try.)
+Segal, T. (n.d.). Understanding the Five Cs of Credit. Investopedia.
+  https://www.investopedia.com/ask/answers/040115/what-most-important-c-five-cs-credit.asp
 
-[Top 5 Factors Affecting Credit Risk When Taking A Personal Loan](https://www.forbes.com/advisor/in/personal-loan/top-5-factors-affecting-credit-risk-when-taking-a-personal-loan/)
+The R Foundation. (n.d.). Control of Mixed Model Fitting—R. R Documentation.
+  https://search.r-project.org/CRAN/refmans/lme4/html/lmerControl.html
 
-[Understanding the Five Cs of Credit](https://www.investopedia.com/ask/answers/040115/what-most-important-c-five-cs-credit.asp)
+Wakefield, F. (2023, October 4). How Much Do Solar Panels Cost? (2023 Guide). MarketWatch.
+  https://www.marketwatch.com/guides/solar/solar-panel-cost/#:~:text=Based%20on%20our%20survey%20of,upward%20of%20%2425%2C00
+  %20per%20installation.
