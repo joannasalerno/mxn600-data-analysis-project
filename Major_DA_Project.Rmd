@@ -3,7 +3,6 @@ title: "MXN600 Major Data Anaysis Project"
 author: "Joanna Salerno, Pavan Asopa, Sevin Nejadi, Fernanda Martins Giuriati"
 date: "`r Sys.Date()`"
 output: pdf_document
-bibliography: references.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -1085,7 +1084,7 @@ If we compare the variance of each random effect, we'll see that location has a 
 
 Below, we will create a plot that depicts the odds ratio of repayment failure for our final extended GLMM model, including confidence interval ranges. These estimates are all compared to the baseline, which includes the 36-month loan term, less than one year of employment, and the loan purpose of "car".
 
-```{r odds_ratio_plot_GLM}
+```{r odds_ratio_plot_GLMM}
 plot_data <- data.frame(
   Variable = rownames(model_results2),
   OddsRatio = model_results2$OddsRatio,
