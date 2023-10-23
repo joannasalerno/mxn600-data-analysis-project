@@ -2,7 +2,9 @@
 title: "MXN600 Major Data Anaysis Project"
 author: "Joanna Salerno, Pavan Asopa, Sevin Nejadi, Fernanda Martins Giuriati"
 date: "`r Sys.Date()`"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -227,7 +229,7 @@ ggplot(train_data, aes(x = purpose)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-The above bar plot represents the frequency of each unique value in the purpose variable. From the plot, it can be seen that the most common reasons to take out loans are for debt consolidation, credit cards, home improvement, and cars.
+The above bar plot represents the frequency of each unique value in the purpose variable. From the plot, it can be seen that the most common reasons to take out loans are for debt consolidation, credit cards, other, and home improvement.
 
 ```{r dist_plots_3}
 ggplot(train_data, aes(x = term, y = loan_amnt)) +
@@ -298,7 +300,7 @@ val_scaled_data <- val_data %>%
 
 ## Variable Selection
 
-First, we have decided to perform stepwiseAIC to identify the most important predictors of loan default, from the list of 16 variables we identified above: annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, revol_util, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs, and pub_rec.
+First, we have decided to perform stepwiseAIC to identify the most important predictors of loan default, from the list of 16 variables we identified above: annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, revol_util, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs, and pub_rec. However, due to computing limitations, none of the group members succeeded in running it with a full model that includes interactions between variables. Instead, we decided to use the sum of variables as the full model.
 
 ```{r stepAIC}
 # Full model for backwards selection:
@@ -1129,7 +1131,7 @@ Specifically, below are the three questions we set out to answer in part 2 of th
 5. Does credit risk change over time or between states? This is not something the bank has previously
 investigated and results may inform modified loan policies in the future.
 
-In terms of question 3, we can say that yes, accounting for the variation in location and time does improve our model's performance benchmarks. Specifically, our extended model achieved a $Gini=$, compared to the final model of the first part of our analysis, which had a $Gini=0.4110$. This improved Gini score tells us that our extended model did a slightly better job at predicting whether applicants would fail to repay their loans or not.
+In terms of question 3, we can say that yes, accounting for the variation in location and time does improve our model's performance benchmarks. Specifically, our extended model achieved a $Gini=0.437$, compared to the final model of the first part of our analysis, which had a $Gini=0.410$. This improved Gini score tells us that our extended model did a slightly better job at predicting whether applicants would fail to repay their loans or not.
 
 In terms of question4, we were a bit surprised by the inclusion of 4 more significant covariates in our model, after accounting for this variation:
 
@@ -1162,7 +1164,7 @@ Our new model has demonstrated significantly improved performance in comparison 
 * Interest rate
 * Unspecified employment length (whether information is missing or the individual is unemployed)
 * Annual income
-* Loan purposes of medical, moving, small business, vacation, other, debt consolidation, educational, home improvement, and renewable energy
+* Loan purposes of medical, moving, small business, vacation, other
 * Number of inquiries in the last 6 months
 * Number of derogatory public records
 * Revolving balance and utilization
