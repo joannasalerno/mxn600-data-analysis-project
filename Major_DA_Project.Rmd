@@ -304,8 +304,9 @@ First, we have decided to perform stepwiseAIC to identify the most important pre
 
 ```{r stepAIC}
 # Full model for backwards selection:
-full_model <- glm(repay_fail ~ loan_amnt + term + int_rate + emp_length + home_ownership + annual_inc + verification_status + purpose + dti + delinq_2yrs +
-                    inq_last_6mths + open_acc + pub_rec + revol_bal + revol_util + total_acc + credit_age_yrs,
+full_model <- glm(repay_fail ~ loan_amnt + term + int_rate + emp_length + home_ownership + annual_inc +
+                    verification_status + purpose + dti + delinq_2yrs + inq_last_6mths + open_acc +
+                    pub_rec + revol_bal + revol_util + total_acc + credit_age_yrs,
                   data = train_scaled_data, family = "binomial")
 
 # Model with no variables present for forwards selection:
