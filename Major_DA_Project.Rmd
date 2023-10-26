@@ -1,10 +1,8 @@
 ---
-title: "MXN600 Major Data Anaysis Project"
+title: "MXN600: Credit Risk 2023"
 author: "Joanna Salerno, Pavan Asopa, Sevin Nejadi, Fernanda Martins Giuriati"
 date: "`r Sys.Date()`"
-output:
-  html_document:
-    df_print: paged
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -196,15 +194,15 @@ ggarrange(p5)
 
 Explanations: 
 
-Plot1 is a histogram that displays the distribution of interest rates in the dataset. The bars in the histogram are filled based on whether the loan was repaid successfully or not, where fill colours represent the two categories 0 for no failure and 1 for failure of loan repayment. Based on the plot, a trend can be seen that as the interest rate increases so does the chances of loan repayment failures.
+Plot1 is a histogram that displays the distribution of interest rates in the dataset. The bars in the histogram are filled based on whether the loan was repaid successfully or not, where fill colours represent the two categories 0 for no failure and 1 for failure of loan repayment. Based on the plot, a trend can be seen that as the interest rate increases so does the chances of loan repayment failure.
 
-Plot2 is a boxplot that shows the distribution of annual incomes based on different verification statuses. Each box represent a category of verification status. Based on the plot, we can see that we have similar sized boxes for all three categories which suggests that the median income for applicants in these categories is relatively consistent. However, we can see the presence of outlier in all three verification_status categories indicating that there are individuals with very high income within each group.
+Plot2 is a boxplot that shows the distribution of annual incomes based on different verification statuses. Each box represent a category of verification status. Based on the plot, we can see that we have similar sized boxes for all three categories which suggests that the median income for applicants in these categories is relatively consistent. However, we can see the presence of outliers in all three verification_status categories, indicating that there are individuals with very high income within each group. The largest outliers appear in the "not verified" group, which may be concerning for the bank.
 
-Plot3 is a boxplot that compares the loan amounts for both successful and unsuccessful loan repayments. Based on the plot, it can be seen that the median loan amount for both categories of loan repayment status are more or less consistent. The presence of outlier in both categories indicates that there are individuals with very high loan amount within each group. 
+Plot3 is a boxplot that compares the loan amounts for both successful and unsuccessful loan repayments. Based on the plot, it can be seen that the median loan amount for both categories of loan repayment status are more or less consistent. The presence of outliers in both categories indicates that there are individuals with very high loan amounts within each group. 
 
-Plot4 is a boxplot that compares annual income between successful and unsuccessful loan repayments. Based on the plot it can be seen that most individuals that successfully paid off their loans are more or less consistent with the ones who failed with an exception of outliers in both categories.
+Plot4 is a boxplot that compares annual income between successful and unsuccessful loan repayments. Based on the plot, it can be seen that most individuals that successfully paid off their loans are more or less consistent with the ones who failed with an exception of outliers in both categories. The outliers in terms of larger annual incomes of $750,000 or more consistently paid their loans back in full.
 
-Plot5 is scatter plot that displays relationship annual income and loan amount. 
+Plot5 is scatter plot that displays the relationship between annual income and loan amount. No apparent trends appear in this plot, indicating that individuals with a range of annual incomes also request to borrow loans for a range of loan amounts.
 
 Now, we will visualize the distribution of each of the numeric variables in the dataset, using histograms:
 
@@ -218,9 +216,9 @@ for (var in numeric_vars) {
 }
 ```
 
-The above plots shows the distribution of the numeric variables within the dataset. These reveal that several variables, namely 'annual_inc,' 'delinq_2yrs,' 'inq_last_6mths,' 'pub_rec,' and 'revol_bal,' exhibit significant outliers, which can potentially impact the integrity of our analysis.
+The above plots shows the distribution of the numeric variables within the dataset. These reveal that several variables, namely 'annual_inc,' 'delinq_2yrs,' 'inq_last_6mths,' 'pub_rec,' and 'revol_bal,' exhibit significant outliers as well as largely varying ranges of values, which can potentially impact the integrity of our analysis.
 
-To address the presence of these outliers and to ensure the robustness of our subsequent statistical modeling, we have chosen to apply a scaling transformation to the numeric covariates in the dataset. The resulting scaled variables will enable us to conduct our analysis with a dataset that has been preprocessed to reduce the undue impact of outliers.
+To address the presence of these outliers and large ranges of values and to ensure the robustness of our subsequent statistical modeling, we have chosen to apply a scaling transformation to the numeric covariates in the dataset. The resulting scaled variables will enable us to conduct our analysis with a dataset that has been preprocessed to reduce the undue impact of outliers, so that we can more accurately and appropriately compare our chosen numeric variables.
 
 ```{r dist_plots_2}
 ggplot(train_data, aes(x = purpose)) +
@@ -257,7 +255,7 @@ Following our examination of this matrix, each variable within pairs of highly c
 
 Keeping our above exploratory analysis in mind, we also reviewed articles on the factors that traditionally impact an individual's credit risk, especially when applying for loans. Both [Understanding the Five Cs of Credit](https://www.investopedia.com/ask/answers/040115/what-most-important-c-five-cs-credit.asp) and [Top 5 Factors Affecting Credit Risk When Taking A Personal Loan](https://www.forbes.com/advisor/in/personal-loan/top-5-factors-affecting-credit-risk-when-taking-a-personal-loan/) discussed the same 5 major factors impacting credit risk: 1) capacity, 2) capital, 3) conditions, 4) collateral, and 5) character. Factors related to capacity include an individual's employment history and job stability, as well as their annual income. Debt to equity ratios are also assessed as part of capacity. Capital demonstrates an individual's net worth and allows them to list assets that could be used as a reserve in unforeseen circumstances. Lenders will look at current market conditions as well to assess the relative risk presented to the applicant in repaying the loan. Collateral includes assets an applicant may pledge as security to be used in the case that they fail to repay the loan. Finally, character encompasses many factors, including an individual's credit history (how long they have had credit for?), repayment history (are they typically paying on time or not?), any previous loan defaults, and derogatory records for the individual. These 5 factors have been cited in multiple financial resources as those most important in evaluating and determining an applicant's credit risk.
 
-Taking the above research into consideration, as well as our exploratory analysis of the available data, we have been able to match up some of the variables within the available data with those cited as being traditionally important for determining credit risk. For example, we have annual income (*annual_inc*), employment length (*emp_length*), revolving balances (*revol_bal*), revolving utilization, (*revol_util*), and debt-to-income ratio (*dti*) variables which all relate to the first factor listed above, capacity. We do not seem to have any relevant data to account for capital, but perhaps interest rate (*int_rate*) may be an indication of some of the market conditions, as interest rates tend to be higher during financial crises or recessions. We also have home ownership (*home_ownership*), which includes whether an applicant owns a home or is renting, and this could be considered under the factor of collateral. Finally, the following variables may relate to the factor of character: their credit age (*credit_age_yrs*), which demonstrates part of their credit history; total accounts (*total_acc*), which may demonstrate credit usage; inquiries in the last 6 months (*inq_last_6mths*), which demonstrates the frequency the individual is applying for credit or conducting activities which require credit check inquiries; the number of 30+ days past-due incidences of delinquency for the past 2 years (*delinq_2yrs*); number of derogatory public records (*pub_rec*). Other variables that seem relevant and potentially important to provide more information on the requested loan within the context of the applicant include the loan's purpose (*purpose*), amount (*loan_amnt*), and term length (*term*). Finally, we feel as though verification status (*verification_status*) may be important, as this indicates whether an applicant's income was officially verified. If an application's income is verified, this may prove beneficial to their application. Thus, we have listed below the initial 16 variables we wish to further investigate in relation to credit risk:
+Taking the above research into consideration, as well as our exploratory analysis of the available data, we have been able to match up some of the variables within the available data with those cited as being traditionally important for determining credit risk. For example, we have annual income (*annual_inc*), employment length (*emp_length*), revolving balances (*revol_bal*), revolving utilization, (*revol_util*), and debt-to-income ratio (*dti*) variables which all relate to the first factor listed above, capacity. We do not seem to have any relevant data to account for capital, but perhaps interest rate (*int_rate*) may be an indication of some of the market conditions, as interest rates tend to be higher during financial crises or recessions. We also have home ownership (*home_ownership*), which includes whether an applicant owns a home or is renting, and this could be considered under the factor of collateral. Finally, the following variables may relate to the factor of character: their credit age (*credit_age_yrs*), which demonstrates part of their credit history; total accounts (*total_acc*), which may demonstrate credit usage; inquiries in the last 6 months (*inq_last_6mths*), which demonstrates the frequency the individual is applying for credit or conducting activities which require credit check inquiries; the number of 30+ days past-due incidences of delinquency for the past 2 years (*delinq_2yrs*); number of derogatory public records (*pub_rec*). Other variables that seem relevant and potentially important to provide more information on the requested loan within the context of the applicant include the loan's purpose (*purpose*), amount (*loan_amnt*), and term length (*term*). Finally, we feel as though verification status (*verification_status*) may be important, as this indicates whether an applicant's income was officially verified. If an applicant's income is verified, this may prove beneficial to their application. Thus, we have listed below the initial 16 variables we wish to further investigate in relation to credit risk:
 
 annual_inc, emp_length, verification_status, dti, credit_age_yrs, home_ownership, total_acc, revol_bal, revol_util, int_rate, term, purpose, loan_amnt, inq_last_6mths, delinq_2yrs, pub_rec
                    
@@ -588,6 +586,8 @@ res_cloglog = simulateResiduals(fit_cloglog)
 plot(res_cloglog)
 ```
 
+As can be seen above, the model fit with the cloglog link function appears to be a good fit for the data, as there is no indication of non-normality, overdispersion, or outliers in the residuals. However, the cloglog model has a higher AIC than both the logit and probit models.
+
 ### Cloglog Model: Performance
 
 Now, we will assess the performance of the model fit using the cloglog link function for comparison against the logit link function model.
@@ -616,7 +616,7 @@ Gini
 plot(g)
 ```
 
-As can be seen above, the model fit with the cloglog link function appears to be a good fit for the data, as there is no indication of non-normality, overdispersion, or outliers in the residuals. However, the cloglog model has a higher AIC than both the logit and probit models. Furthermore, the cloglog model has a slightly lower Gini score on the the training dataset (Logit model: $Gini=0.410$ on train, $Gini=0.395$ on validation vs. Cloglog model: $Gini=0.407$ on train, $Gini=0.395$).
+The cloglog model has a slightly lower Gini score on the the training dataset (Logit model: $Gini=0.410$ on train, $Gini=0.395$ on validation vs. Cloglog model: $Gini=0.407$ on train, $Gini=0.395$ on validation).
 
 Based on the comparisons conducted between the three different link functions for our GLM model, we will choose to use the model with the logit link function as our final model. This model demonstrated the best combination of AIC value and performance, including predictive performance on unseen data, compared to the other models.
 
@@ -682,7 +682,7 @@ Listed below are interpretations of the covariates of our final model:
 
 * For loans with a stated purpose of "credit card", "debt consolidation", "educational", "home improvement", "house", "major purchase", "renewable energy", and "wedding", there is no significant effect on the odds of "repay_fail" occurring compared to the reference category (car). As all $p > 0.05$, these loan purposes do not significantly impact the likelihood of loan repayment failure.
 
-     + For loans with a stated purpose of "medical", the odds of "repay_fail" occurring increase by a factor of approximately 1.83 (95% CI: [1.30-2.57], $p = 0.000502$), compared to the baseline (car).
+     + For loans with a stated purpose of "medical", the odds of "repay_fail" occurring increase by a factor of approximately 1.83 (95% CI: [1.30,2.57], $p = 0.000502$), compared to the baseline (car).
 
     + For loans with a stated purpose of "moving", the odds of "repay_fail" occurring increase by a factor of approximately 1.65 (95% CI: [1.15,2.36], $p = 0.006978$), compared to baseline (car).
 
@@ -760,7 +760,7 @@ repay_fail ~ int_rate + emp_length + annual_inc + purpose + inq_last_6mths + pub
 
 We justified arriving at this model by conducting $\chi^2$-tests between different tested models to determine whether new models with different variables and interactions were significantly better at explaining the variability in the data. We then took a look at the goodness-of-fit of our selected model, and we were pleased to find that our model fit the data reasonably well. We produced residuals plots which did not indicate any deviations from normality, overdispersion, or outliers in the model residuals. In other words, these plots demonstrated that our model was a good fit for the data and did a relatively good job of explaining the variation in the data. We also compared the AIC values of our final chosen model with the other models we fit, and the chosen model has the lowest AIC value.
 
-Just to be sure, we also tested different link functions with the same final model formula. We tested both a probit and complementary log-log link function. The probit model, while demonstrating a lower AIC value than the initial logit model, did not do as well in terms of prediction. Ultimately, we want our model to not only fit the data well, but also to do a good job of predicting whether applicants will default or not. The complementary log-log model had a higher AIC value than the initial logit model, and we chose to not assess its predictive performance because of this. Thus, we ultimately selected the logit link function as the best link function for our final model.
+Just to be sure, we also tested different link functions with the same final model formula. We tested both a probit and complementary log-log link function. The probit model, while demonstrating a lower AIC value than the initial logit model, did not do as well in terms of prediction. Ultimately, we want our model to not only fit the data well, but also to do a good job of predicting whether applicants will default or not. The complementary log-log model had a higher AIC value than the initial logit model, and it did not perform as well on seen data. Thus, we ultimately selected the logit link function as the best link function for our final model.
 
 We produced receiver operating characteristic (ROC) curves and calculated Gini scores to test our model's performance. Our goal was to build a model that improved the ROC curve from those of the bank's previous models, so that the curve reached more towards the upper-left-hand corner of the graph area. This would mean that the model did a better job at correctly distinguishing between the classes of repayment (repay_fail == 1 vs repay_fail == 0). The Gini score is a numeric representation of the area under the ROC curve, which also indicates a model's classification performance.
 
@@ -788,7 +788,7 @@ Our model summary demonstrated that the important (and in this case, important m
 * 60-month loan term
 * Interest rate * 60-month loan term
 
-Only two of the important covariates in our model were associated with a significant decrease in the risk of credit default: annual income, which was associated with a decreased risk of default by a factor of 0.71 (95% CI: [0.67,0.75], $p < 2e-16$), and the interaction between interest rate and the 60-month loan term, which was associated with a decreased risk of default by a factor of 0.90 (95% CI: [0.82,0.98], $p = 0.013086$). All other listed important covariates are associated with an increase in the risk of credit default. Of these, the covariates associated with the larger increased risks of credit default are: the loan purposes of small business, with an increased risk of default by a factor of 2.78 (95% CI: [2.15,3.59], $p = 5.80e-15$), and medical, with an increased risk of default by a factor of 2.78 (95% CI: [2.15,3.59], $p = 5.80e-15$). Applicants with a value of "n/a" for employment length, whether that means they are unemployed or simply did not provide this information, also had a relatively large increased risk of default compared to other covariates, by a factor of 1.73 (95% CI: [1.37,2.19], $p = 4.11e-06$).
+Only two of the important covariates in our model were associated with a significant decrease in the risk of credit default: annual income, which was associated with a decreased risk of default by a factor of 0.71 (95% CI: [0.67,0.75], $p < 2e-16$), and the interaction between interest rate and the 60-month loan term, which was associated with a decreased risk of default by a factor of 0.90 (95% CI: [0.82,0.98], $p = 0.013086$). All other listed important covariates are associated with an increase in the risk of credit default. Of these, the covariates associated with the larger increased risks of credit default are: the loan purposes of small business, with an increased risk of default by a factor of 2.78 (95% CI: [2.15,3.59], $p = 5.80e-15$), and medical, with an increased risk of default by a factor of 1.83 (95% CI: [1.30,2.57], $p = 0.000502$). Applicants with a value of "n/a" for employment length, whether that means they are unemployed or simply did not provide this information, also had a relatively large increased risk of default compared to other covariates, by a factor of 1.73 (95% CI: [1.37,2.19], $p = 4.11e-06$).
 
 We found the relationship between interest rate and loan term on loan default to be interesting. While on their own, both interest rate and the 60-month loan term were associated with an increase in the odds that an applicant will fail to repay, the interaction between these two variables was associated with a decrease in the odds of repayment failure. This indicates that the relationship between interest rate and loan repayment may differ depending on the term length, with the effect changing for longer-term loans.
 
@@ -892,7 +892,7 @@ The model ran successfully, so we'll take a look at the summary:
 summary(fit_var_3)
 ```
 
-The AIC value 30126.5, which is lower than that of the first extended model (fit_var_1). This indicates the new model with both added random effects of state and time is a better fit.
+This model has a AIC value of 30126.5, which is lower than that of the first extended model (fit_var_1). This indicates the new model with both added random effects of state and time is a better fit.
 
 Now, we'll add in one more random effect, which is zip code. Once again, we will fit this model with an increased tolerance, compared to the default tolerance:
 
@@ -984,7 +984,7 @@ hist(res$earliest_cr_line[,1])
 hist(res$location[,1])
 ```
 
-As can be seen in the above plots, the residuals for the random effects of both time and location appear to be roughly normally distributed, which indicates to us that the chosen model did is a relatively good fit for the data.
+As can be seen in the above plots, the residuals for the random effects of both time and location appear to be roughly normally distributed, which indicates to us that the chosen model is a relatively good fit for the data.
 
 ## Calculate Odds Ratio and CIs
 
@@ -1038,19 +1038,19 @@ Accounting for variation in time and location does have an impact on our model. 
 
 * purpose == debt_consolidation
 
-For loans with a stated purpose of debt consolidation, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: [1.04-1.48], $p = 0.016010$), compared to the baseline (car).
+For loans with a stated purpose of debt consolidation, the odds of "repay_fail" occurring increase by a factor of approximately 1.24 (95% CI: [1.04,1.48], $p = 0.016010$), compared to the baseline (car).
 
 * purpose == educational
 
-For loans with a stated purpose of education, the odds of "repay_fail" occurring increase by a factor of approximately 2.03 (95% CI: [1.50-2.76], $p = 0.0000068$), compared to the baseline (car).
+For loans with a stated purpose of education, the odds of "repay_fail" occurring increase by a factor of approximately 2.03 (95% CI: [1.50,2.76], $p = 0.0000068$), compared to the baseline (car).
 
 * purpose == home_improvement
 
-For loans with a stated purpose of home improvement, the odds of "repay_fail" occurring increase by a factor of approximately 1.23 (95% CI: [1.00-1.50], $p = 0.0479871$), compared to the baseline (car).
+For loans with a stated purpose of home improvement, the odds of "repay_fail" occurring increase by a factor of approximately 1.23 (95% CI: [1.00,1.50], $p = 0.0479871$), compared to the baseline (car).
 
 * purpose == renewable_energy
 
-For loans with a stated purpose of renewable energy, the odds of "repay_fail" occurring increase by a factor of approximately 1.82 (95% CI: [1.00-3.28], $p = 0.0470893$), compared to the baseline (car).
+For loans with a stated purpose of renewable energy, the odds of "repay_fail" occurring increase by a factor of approximately 1.82 (95% CI: [1.01,3.28], $p = 0.0470893$), compared to the baseline (car).
 
 Beyond these differences, this extended model had the same general set of significant covariates and interactions, in the same directions, though the effect sizes and p-values may vary.
 
@@ -1060,7 +1060,7 @@ In summary, the full list of important variables in our extended model is as fol
 * Unspecified employment length (whether information is missing or the individual is unemployed)
 * Annual income
 * Loan purposes of medical, moving, small business, vacation, other
-    + debt consolidation, educational, home improvement, renewable energy (new with extended model)
+    + Debt consolidation, educational, home improvement, renewable energy (new with extended model)
 * Number of inquiries in the last 6 months
 * Number of derogatory public records
 * Revolving balance and utilization
@@ -1134,7 +1134,7 @@ investigated and results may inform modified loan policies in the future.
 
 In terms of question 3, we can say that yes, accounting for the variation in location and time does improve our model's performance benchmarks. Specifically, our extended model achieved a $Gini=0.437$, compared to the final model of the first part of our analysis, which had a $Gini=0.410$. This improved Gini score tells us that our extended model did a slightly better job at predicting whether applicants would fail to repay their loans or not.
 
-In terms of question4, we were a bit surprised by the inclusion of 4 more significant covariates in our model, after accounting for this variation:
+In terms of question 4, we were a bit surprised by the inclusion of 4 more significant covariates in our model, after accounting for this variation:
 
 * Debt consolidation
 * Educational
@@ -1143,7 +1143,7 @@ In terms of question4, we were a bit surprised by the inclusion of 4 more signif
 
 Once again, all 4 were associated with an increased risk of repayment failure. Initially, debt consolidation and educational purposes made the most sense to us as being important factors contributing to credit risk, as typically, if an individual is consolidating their debt, they have a decent amount of it. Furthermore, educational expenses, especially in the United States, are rather high and many student loan borrowers are in a great deal of student loan debt. Thus, we are assuming that individuals seeking loans for the purposes of debt consolidation and education will be requesting higher loan amounts, which could be risky in terms of their ability to fully repay them.
 
-However, home improvement and renewable energy loans surprised us as being significant, at least initially. When further considering these, though, we realized that typically, home improvement and the installation or switch to renewable energy are often associated with larger upfront costs, with delayed benefits. For example, when choosing to install solar panels on a home, prices can range between \$15,000.00 and \$20,000.00, though some homes may cost an upwards of \$25,000.00 for full installation ([How Much Do Solar Panels Cost? (2023 Guide)](https://www.marketwatch.com/guides/solar/solar-panel-cost/#:~:text=Based%20on%20our%20survey%20of,upward%20of%20%2425%2C000%20per%20installation.)). Furthermore, individuals typically do not begin to see the benefits in terms of decreased energy bills and savings for months to come, thus putting them at a greater initial risk of failing to repay their loan. Prices for education, home improvement, and renewable energy also tend to vary by location; educational expenses will vary based on desired locations and cost of living, as well as whether the school is public or private. In terms of home improvement and renewable energy, associated costs will depend on the market value of homes, as well as current prices of supplies and costs for contractors (if necessary). These all make more sense in the context of this part of our analysis, as we are now accounting for variations in location, thus potentially helping to explain why the above-listed covariates are newly significant in this extended model.
+However, home improvement and renewable energy loans surprised us as being significant, at least initially. When further considering these, though, we realized that typically, home improvement and the installation or switch to renewable energy are often associated with larger upfront costs, with delayed benefits. For example, when choosing to install solar panels on a home, prices can range between \$15,000.00 and \$20,000.00, though some homes may cost an upwards of \$25,000.00 for full installation [How Much Do Solar Panels Cost? (2023 Guide)](https://www.marketwatch.com/guides/solar/solar-panel-cost/#:~:text=Based%20on%20our%20survey%20of,upward%20of%20%2425%2C000%20per%20installation.). Furthermore, individuals typically do not begin to see the benefits in terms of decreased energy bills and savings for months to come, thus putting them at a greater initial risk of failing to repay their loan. Prices for education, home improvement, and renewable energy also tend to vary by location; educational expenses will vary based on desired locations and cost of living, as well as whether the school is public or private. In terms of home improvement and renewable energy, associated costs will depend on the market value of homes, as well as current prices of supplies and costs for contractors (if necessary). These all make more sense in the context of this part of our analysis, as we are now accounting for variations in location, thus potentially helping to explain why the above-listed covariates are newly significant in this extended model.
 
 Finally, for the last question (question 5), credit risk does appear to change over time and between states. Credit risk changes more between states than time, as the variance for location was 0.05, compared to that for time, which was 0.01. Thus, location does seem to have a moderate impact on an individual's credit risk, and thus, the bank should consider location when assessing loan applications and policies.
 
@@ -1174,11 +1174,30 @@ Our new model has demonstrated significantly improved performance in comparison 
 
 These mostly align with the variables traditionally used to predict credit risk in the banking sector. A main deviation from tradition is that our new model excluded the variables of debt to income ratio, home ownership, and loan amount, which surprised us.
 
-When we extended our new credit risk model to account for variations in location and time, we did see improved model performance benchmarks in that we received an improved Gini score ($Gini=0.437$ on extended versus $Gini=0.410$ on model without accounting for variation). We were only able to assess this model's performance on seen data, and could not assess it's predictive performance on new loan applications.
+When we extended our new credit risk model to account for variations in location and time, we did see improved model performance benchmarks in that we received an improved Gini score ($Gini=0.437$ on extended versus $Gini=0.410$ on model without accounting for variation). We were only able to assess this model's performance on seen data, and could not assess it's predictive performance on new loan applications. Included below is a plot depicting the ROC curves, including Gini scores, for both newly proposed models. Model 1 refers to the initial new model we built, and model 2 refers to our extended model.
+
+```{r plot_all_roc}
+# roc curves
+roc_logit_train <- roc(train_scaled_data$repay_fail, prob_logit_train)
+roc_logit_val <- roc(val_scaled_data$repay_fail, prob_logit_val)
+roc_ext <- roc(extended_scaled$repay_fail, prob_ext)
+
+# plot all
+plot (roc_logit_train, col="darkmagenta", main = "ROC Curves for Models 1 & 2")
+plot(roc_logit_val, col = "seagreen2", add = TRUE)
+plot(roc_ext, col = "salmon", add = TRUE)
+
+# add legend
+legend("bottomright",
+       legend = c(paste("Model 1 (seen), Gini =", round(2 * auc(roc_logit_train) - 1, 3)),
+                  paste("Model 1 (unseen), Gini =", round(2 * auc(roc_logit_val) - 1, 3)),
+                  paste("Model 2 (seen), Gini =", round(2 * auc(roc_ext) - 1, 3))),
+       col = c("darkmagenta", "seagreen2", "salmon"), lty = 1)
+```
 
 We were initially surprised by the addition of 4 newly significant covariates in our extended model, which were the loan purposes of debt consolidation, educational, home improvement, and renewable energy. However, given that the overall cost of many of these purposes will likely vary based on location, these actually do make sense in the context of our extended model.
 
-Finally, we found that credit risk changes more over location than time, so this is a variable the bank should consider future loan applications and policies.
+Finally, we found that credit risk changes more over location than time, so this is a variable the bank should consider in future loan applications and policies.
 
 While our final model may not be the _best_ model, it is a _better_ model than the bank has previously used. Thus, we have adequately addressed the bank's concerns by presenting a model that does a better job of predicting loan default, and we hope the bank is delighted by our findings.
 
@@ -1193,7 +1212,7 @@ Though we have attempted to conduct a thorough and meaningful analysis to develo
 
 ## Future Directions
 
-As mentioned above, further research could explore other variables and interactions between variables which were excluded in our analyses. This may further improve performance benchmarks the model's ability to predict whether applicants will fail to repay their loans or not. Furthermore, if provided with a validation dataset which included the extended variables of location and time, it may be useful to use the extended model to predict loan default on this "unseen" data and compare the extended model's prediction performance with that of the new model from the first part of our analysis. This could further validate whether the extended model improves performance benchmarks.
+As mentioned above, further research could explore other variables and interactions between variables which were excluded in our analyses. This may further improve performance benchmarks and the model's ability to predict whether applicants will fail to repay their loans or not. Furthermore, if provided with a validation dataset which included the extended variables of location and time, it may be useful to use the extended model to predict loan default on this "unseen" data and compare the extended model's prediction performance with that of the new model from the first part of our analysis. This could further validate whether the extended model improves performance benchmarks.
 
 # Bibliography
 
